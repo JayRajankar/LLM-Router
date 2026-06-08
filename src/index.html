@@ -121,7 +121,15 @@ textarea{min-height:88px}
 .trl{background:rgba(251,191,36,.08);color:var(--warn)}
 .ter{background:rgba(248,113,113,.08);color:var(--danger)}
 .tau{background:rgba(56,189,248,.08);color:var(--info)}
-.empty{color:var(--muted);font-family:var(--mono);font-size:.7rem;padding:2rem;text-align:center}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(8,8,15,.85);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:100%;max-width:500px;overflow:hidden;transform:translateY(10px);transition:transform .2s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-hdr{padding:1rem 1.2rem;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between;font-weight:700}
+.modal-close{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1.2rem}
+.modal-body{padding:1.2rem;max-height:60vh;overflow-y:auto}
+.modal-foot{padding:1rem 1.2rem;border-top:1px solid var(--border);background:var(--surface2);display:flex;justify-content:flex-end;gap:.8rem}
 </style>
 </head>
 <body>
@@ -189,6 +197,21 @@ textarea{min-height:88px}
 </div>
 
 </div>
+
+<div class="modal-overlay" id="cfg-modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <span id="cfg-title">Configure Provider</span>
+      <button class="modal-close" onclick="closeConfig()">×</button>
+    </div>
+    <div class="modal-body" id="cfg-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeConfig()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveConfig()">Save Settings</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const BASE = window.location.origin;
 document.getElementById('ep-url').textContent = `${BASE}/v1/chat/completions`;
@@ -204,9 +227,16 @@ function stTag(s){
   return `<span class="tag ${m[s]||'ter'}">${s.replace(/_/g,' ')}</span>`;
 }
 
+let providersData = {};
+let currentEnv = {};
+
 async function load(){
   try{
     const d = await fetch(`${BASE}/api/status`).then(r=>r.json());
+    providersData = d.providers;
+    const s = await fetch(`${BASE}/api/settings`).then(r=>r.json());
+    currentEnv = s.env || {};
+
     document.getElementById('s-slots').textContent = d.totalSlots;
     document.getElementById('s-active').textContent = d.activeSlots;
     let ok=0,rl=0,er=0;
@@ -228,6 +258,7 @@ async function load(){
             <div class="picon">${p.icon}</div>
             <div class="pname">${p.name}</div>
             <span class="ppill ${on?'pill-on':'pill-off'}">${on?p.keyCount+' key'+(p.keyCount>1?'s':''):'NO KEYS'}</span>
+            <button class="btn btn-ghost" style="padding:.2rem .5rem;font-size:.65rem;margin-left:.5rem" onclick="openConfig('${p.id}')">⚙️</button>
           </div>
           <div class="pfree">${p.freeInfo}</div>
           ${p.note?`<div class="pnote">${p.note}</div>`:''}
@@ -259,6 +290,98 @@ async function load(){
       </tr>`).join('');
     }
   }catch(e){console.error(e);}
+}
+
+let cfgProviderId = null;
+const ENV_MAP = {
+  groq: 'GROQ_API_KEY', cerebras: 'CEREBRAS_API_KEY', openrouter: 'OPENROUTER_API_KEY', google_ai: 'GOOGLE_AI_KEY', nvidia: 'NVIDIA_API_KEY', mistral: 'MISTRAL_API_KEY', codestral: 'CODESTRAL_API_KEY', huggingface: 'HUGGINGFACE_API_KEY', cohere: 'COHERE_API_KEY', github_models: 'GITHUB_TOKEN', cloudflare: 'CF_API_KEY'
+};
+
+function openConfig(id) {
+  cfgProviderId = id;
+  const p = providersData[id];
+  document.getElementById('cfg-title').textContent = `Configure ${p.name}`;
+  
+  const prefix = ENV_MAP[id];
+  
+  let isCustom = !p.models.includes(p.defaultModel);
+  
+  let html = `<div class="field"><label>Default Model</label>
+    <select id="cfg-model-select" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:.76rem;padding:.6rem .8rem;outline:none;margin-bottom:0.4rem;transition:border-color .2s" onchange="document.getElementById('cfg-model-custom-wrap').style.display=this.value==='custom'?'block':'none'">
+      ${p.models.map(m => `<option value="${m}" ${m===p.defaultModel?'selected':''}>${m}</option>`).join('')}
+      <option value="custom" ${isCustom?'selected':''}>Other (Custom Model)...</option>
+    </select>
+    <div id="cfg-model-custom-wrap" style="display:${isCustom?'block':'none'}">
+      <input id="cfg-model-custom" type="text" value="${isCustom ? p.defaultModel : ''}" placeholder="Enter custom model name (e.g. org/model)">
+    </div>
+    <div style="font-size:0.6rem;color:var(--muted);margin-top:0.3rem">Original Fallback: ${p.models[0]}</div>
+  </div><hr style="border:0;border-top:1px solid var(--border);margin:1rem 0">`;
+  
+  if (id === 'cloudflare') {
+    html += `<div class="field"><label>Account ID (Main)</label><input id="cfg-cf-acc-1" placeholder="${currentEnv['CF_ACCOUNT_ID'] ? '[Configured]' : 'Enter Account ID'}"></div>`;
+    html += `<div class="field"><label>API Key (Main)</label><input type="password" id="cfg-key-1" placeholder="${currentEnv['CF_API_KEY'] ? '[Configured]' : 'Enter API Key'}"></div>`;
+    html += `<div class="field"><label>Account ID 2</label><input id="cfg-cf-acc-2" placeholder="${currentEnv['CF_ACCOUNT_ID_2'] ? '[Configured]' : 'Optional'}"></div>`;
+    html += `<div class="field"><label>API Key 2</label><input type="password" id="cfg-key-2" placeholder="${currentEnv['CF_API_KEY_2'] ? '[Configured]' : 'Optional'}"></div>`;
+  } else {
+    html += `<div class="field"><label>API Key (Main)</label><input type="password" id="cfg-key-1" placeholder="${currentEnv[prefix] ? '[Configured]' : 'Enter API Key'}"></div>`;
+    html += `<div class="field"><label>API Key 2</label><input type="password" id="cfg-key-2" placeholder="${currentEnv[prefix+'_2'] ? '[Configured]' : 'Optional second key'}"></div>`;
+    html += `<div class="field"><label>API Key 3</label><input type="password" id="cfg-key-3" placeholder="${currentEnv[prefix+'_3'] ? '[Configured]' : 'Optional third key'}"></div>`;
+  }
+  
+  document.getElementById('cfg-body').innerHTML = html;
+  document.getElementById('cfg-modal').classList.add('open');
+}
+
+function closeConfig() {
+  document.getElementById('cfg-modal').classList.remove('open');
+}
+
+async function saveConfig() {
+  const id = cfgProviderId;
+  const p = providersData[id];
+  const prefix = ENV_MAP[id];
+  const modelKey = id === 'cloudflare' ? 'CF_DEFAULT_MODEL' : prefix.replace(/_API_KEY|_TOKEN|_KEY$/, '') + '_DEFAULT_MODEL';
+  
+  const updates = {};
+  const selectVal = document.getElementById('cfg-model-select').value;
+  const customVal = document.getElementById('cfg-model-custom').value.trim();
+  const mVal = selectVal === 'custom' ? customVal : selectVal;
+  
+  if (mVal && mVal !== p.defaultModel) updates[modelKey] = mVal;
+  
+  if (id === 'cloudflare') {
+    const acc1 = document.getElementById('cfg-cf-acc-1')?.value.trim();
+    const key1 = document.getElementById('cfg-key-1')?.value.trim();
+    const acc2 = document.getElementById('cfg-cf-acc-2')?.value.trim();
+    const key2 = document.getElementById('cfg-key-2')?.value.trim();
+    if (acc1) updates['CF_ACCOUNT_ID'] = acc1;
+    if (key1) updates['CF_API_KEY'] = key1;
+    if (acc2) updates['CF_ACCOUNT_ID_2'] = acc2;
+    if (key2) updates['CF_API_KEY_2'] = key2;
+  } else {
+    const k1 = document.getElementById('cfg-key-1')?.value.trim();
+    const k2 = document.getElementById('cfg-key-2')?.value.trim();
+    const k3 = document.getElementById('cfg-key-3')?.value.trim();
+    if (k1) updates[prefix] = k1;
+    if (k2) updates[prefix+'_2'] = k2;
+    if (k3) updates[prefix+'_3'] = k3;
+  }
+  
+  if (Object.keys(updates).length > 0) {
+    const btn = document.querySelector('#cfg-modal .btn-primary');
+    const oldText = btn.textContent;
+    btn.textContent = 'Saving...';
+    btn.disabled = true;
+    await fetch(`${BASE}/api/settings`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(updates)
+    });
+    btn.textContent = oldText;
+    btn.disabled = false;
+  }
+  closeConfig();
+  load();
 }
 
 async function runTest(){

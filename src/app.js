@@ -2,8 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const path = require('path');
-const fs = require('fs');
-require('dotenv').config();
+const { getEnvPath } = require('./setup');
+require('dotenv').config({ path: getEnvPath() });
 
 const app = express();
 app.use(cors());
@@ -235,13 +235,6 @@ const ENV_PREFIXES = {
   github_models: 'GITHUB_TOKEN',
   // cloudflare handled separately below (needs ACCOUNT_ID + API_KEY pair)
 };
-
-// Override default models from environment
-for (const [id, prefix] of Object.entries(ENV_PREFIXES)) {
-  const envKey = prefix.replace(/_API_KEY|_TOKEN|_KEY$/, '') + '_DEFAULT_MODEL';
-  if (process.env[envKey]) PROVIDER_DEFS[id].defaultModel = process.env[envKey];
-}
-if (process.env.CF_DEFAULT_MODEL) PROVIDER_DEFS.cloudflare.defaultModel = process.env.CF_DEFAULT_MODEL;
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  KEY POOL — every (provider, key) pair is one independent rotation slot
@@ -483,54 +476,6 @@ app.post('/api/reset-stats', (req, res) => {
 
 app.get('/api/pool', (req, res) => {
   res.json({ count: KEY_POOL.length, slots: KEY_POOL.map(s => ({ slotId: s.slotId, providerId: s.providerId, keyIndex: s.keyIndex })) });
-});
-
-app.get('/api/settings', (req, res) => {
-  const envMap = {};
-  const allPrefixes = Object.values(ENV_PREFIXES).concat(['CF_ACCOUNT_ID', 'CF_API_KEY']);
-  for (const k of Object.keys(process.env)) {
-    if (allPrefixes.some(prefix => k.startsWith(prefix)) || k.endsWith('_DEFAULT_MODEL')) {
-      const val = process.env[k];
-      envMap[k] = k.endsWith('_DEFAULT_MODEL') ? val : (val && val.length > 8 ? val.substring(0,4) + '...' + val.substring(val.length-4) : val);
-    }
-  }
-  res.json({ env: envMap });
-});
-
-app.post('/api/settings', (req, res) => {
-  const updates = req.body;
-  const envPath = path.join(__dirname, '..', '.env');
-  let envContent = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
-  
-  for (const [k, v] of Object.entries(updates)) {
-    // Only process empty if it's a model (to reset to default) or explicitly overriding.
-    process.env[k] = v;
-    
-    const regex = new RegExp(`^${k}=.*$`, 'm');
-    if (regex.test(envContent)) {
-      envContent = envContent.replace(regex, `${k}=${v}`);
-    } else {
-      envContent += `\n${k}=${v}`;
-    }
-
-    if (k.endsWith('_DEFAULT_MODEL')) {
-      if (k === 'CF_DEFAULT_MODEL') {
-        PROVIDER_DEFS.cloudflare.defaultModel = v || PROVIDER_DEFS.cloudflare.models[0];
-      } else {
-        for (const [id, prefix] of Object.entries(ENV_PREFIXES)) {
-          const expectedK = prefix.replace(/_API_KEY|_TOKEN|_KEY$/, '') + '_DEFAULT_MODEL';
-          if (k === expectedK) PROVIDER_DEFS[id].defaultModel = v || PROVIDER_DEFS[id].models[0];
-        }
-      }
-    }
-  }
-  
-  fs.writeFileSync(envPath, envContent.trim() + '\n', 'utf8');
-  
-  KEY_POOL.length = 0;
-  KEY_POOL.push(...loadKeyPool());
-  
-  res.json({ ok: true });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

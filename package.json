@@ -1,0 +1,29 @@
+{
+  "name": "llm-router",
+  "version": "1.0.0",
+  "description": "Round-robin proxy across 11 permanently free LLM API providers",
+  "main": "src/server.js",
+  "bin": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "build:exe": "pkg . --targets node18-win-x64 --output llm-router.exe"
+  },
+  "pkg": {
+    "assets": [
+      "src/index.html"
+    ]
+  },
+  "keywords": ["llm", "ai", "router", "proxy", "groq", "openrouter", "cerebras", "free"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  }
+}

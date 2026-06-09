@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>🔀 App Router</h1>
+  <h1>🔀 LLM Router</h1>
   <p><b>A high-performance, native desktop application and proxy router across 11 permanently free LLM API providers.</b></p>
   
   [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
@@ -9,7 +9,7 @@
 
 <br />
 
-App Router (formerly LLM Router) is a lightweight proxy and standalone desktop application that aggregates permanently free LLM APIs (like Groq, OpenRouter, Google Gemini, GitHub Models, and more) into a **single, unified OpenAI-compatible endpoint**. 
+LLM Router is a lightweight proxy and standalone desktop application that aggregates permanently free LLM APIs (like Groq, OpenRouter, Google Gemini, GitHub Models, and more) into a **single, unified OpenAI-compatible endpoint**. 
 
 It handles rate limits, automatic round-robin key rotation (supporting multiple accounts/keys per provider), intelligent NLP complexity routing, and dynamic custom model load-balancing.
 
@@ -43,7 +43,7 @@ It handles rate limits, automatic round-robin key rotation (supporting multiple 
 ## 🚀 Getting Started
 
 ### 1. The Native Desktop App (Recommended)
-You can compile App Router into a lightweight, native desktop executable using Tauri. This gives you a standalone app with a system tray icon, Splash Screen, and native UI, wrapping the NodeJS backend entirely!
+You can compile LLM Router into a lightweight, native desktop executable using Tauri. This gives you a standalone app with a system tray icon, Splash Screen, and native UI, wrapping the NodeJS backend entirely!
 
 ```bash
 cd tauri-app
@@ -75,7 +75,7 @@ npm start
 ## 💻 Usage
 
 ### Making a Request
-Since App Router is fully OpenAI-compatible, you can make standard Chat Completion requests on `localhost:3000`:
+Since LLM Router is fully OpenAI-compatible, you can make standard Chat Completion requests on `localhost:3000`:
 
 ```bash
 curl http://127.0.0.1:3000/v1/chat/completions \
@@ -107,7 +107,7 @@ print(response.choices[0].message.content)
 
 ## 📊 Dashboard & Architecture
 
-App Router includes a built-in UI dashboard. Just open `http://127.0.0.1:3000` (or launch the Desktop App).
+LLM Router includes a built-in UI dashboard. Just open `http://127.0.0.1:3000` (or launch the Desktop App).
 
 1. **Dashboard Tab**: Monitor your keys, rate-limits, success logs, and use the built-in Playground.
 2. **Providers Tab**: View exactly which of the 11 providers are active and mapped.

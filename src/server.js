@@ -466,13 +466,55 @@ const KEY_POOL = loadKeyPool();
 const cooldowns  = {};   // slotId → timestamp when cooldown expires
 const COOLDOWN_MS = 60_000; // 60s cooldown after a 429
 
-const state = {
+let state = {
   poolIndex: 0,
   requestLog: [],
   providerStats: Object.fromEntries(
     Object.keys(PROVIDER_DEFS).map(id => [id, { success: 0, failure: 0, rateLimited: 0 }])
   ),
 };
+
+const DATA_FILE = path.join(process.cwd(), 'router_data.json');
+
+function loadState() {
+  if (fs.existsSync(DATA_FILE)) {
+    try {
+      const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+      if (data.state) {
+        state.poolIndex = data.state.poolIndex || 0;
+        state.requestLog = data.state.requestLog || [];
+        if (data.state.providerStats) {
+          Object.assign(state.providerStats, data.state.providerStats);
+        }
+      }
+      if (data.slotStats) {
+        KEY_POOL.forEach(slot => {
+          if (data.slotStats[slot.slotId]) {
+            Object.assign(slot.stats, data.slotStats[slot.slotId]);
+          }
+        });
+      }
+    } catch (e) {
+      console.error('Failed to load router state:', e);
+    }
+  }
+}
+
+function saveState() {
+  try {
+    const slotStats = {};
+    KEY_POOL.forEach(s => { slotStats[s.slotId] = s.stats; });
+    fs.writeFileSync(DATA_FILE, JSON.stringify({ state, slotStats }));
+  } catch (e) {
+    console.error('Failed to save router state:', e);
+  }
+}
+
+loadState();
+setInterval(saveState, 15000); // Save every 15s
+
+process.on('SIGINT', () => { saveState(); process.exit(0); });
+process.on('SIGTERM', () => { saveState(); process.exit(0); });
 
 function getNextSlot(excludeSlotIds = [], filterFn = () => true) {
   const now = Date.now();

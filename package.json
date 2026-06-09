@@ -13,7 +13,8 @@
     "assets": [
       "src/index.html",
       "src/terms.html",
-      "src/privacy.html"
+      "src/privacy.html",
+      "src/logo.png"
     ]
   },
   "keywords": ["llm", "ai", "router", "proxy", "groq", "openrouter", "cerebras", "free"],

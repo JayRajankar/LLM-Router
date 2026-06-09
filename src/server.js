@@ -20,11 +20,15 @@ const PROVIDER_DEFS = {
     baseURL: 'https://api.groq.com/openai/v1',
     defaultModel: 'llama-3.3-70b-versatile',
     models: [
-      'llama-3.1-8b-instant',
       'llama-3.3-70b-versatile',
-      'qwen/qwen3-32b',
-      'openai/gpt-oss-20b',
-      'groq/compound-mini',
+      'llama-3.1-8b-instant',
+      'llama3-70b-8192',
+      'llama3-8b-8192',
+      'mixtral-8x7b-32768',
+      'gemma2-9b-it',
+      'qwen-2.5-32b',
+      'deepseek-r1-distill-llama-70b',
+      'deepseek-r1-distill-qwen-32b'
     ],
     rateLimit: { rpm: 30, rpd: '1,000 (70B) / 14,400 (8B)' },
     format: 'openai',
@@ -40,7 +44,6 @@ const PROVIDER_DEFS = {
     models: [
       'llama3.1-8b',
       'llama3.3-70b',
-      'qwen-3-32b',
     ],
     rateLimit: { rpm: 30, rpd: '14,400' },
     format: 'openai',
@@ -55,12 +58,22 @@ const PROVIDER_DEFS = {
     defaultModel: 'meta-llama/llama-3.3-70b-instruct:free',
     models: [
       'meta-llama/llama-3.3-70b-instruct:free',
+      'meta-llama/llama-3.1-8b-instruct:free',
+      'meta-llama/llama-3.2-1b-instruct:free',
       'meta-llama/llama-3.2-3b-instruct:free',
-      'google/gemma-4-31b-it:free',
-      'qwen/qwen3-coder:free',
-      'nvidia/nemotron-3-super-120b-a12b:free',
-      'openai/gpt-oss-120b:free',
-      'minimax/minimax-m2.5:free',
+      'google/gemma-2-9b-it:free',
+      'mistralai/mistral-7b-instruct:free',
+      'microsoft/phi-3-mini-128k-instruct:free',
+      'microsoft/phi-3-medium-128k-instruct:free',
+      'qwen/qwen-2.5-72b-instruct:free',
+      'qwen/qwen-2.5-7b-instruct:free',
+      'deepseek/deepseek-chat:free',
+      'deepseek/deepseek-r1:free',
+      'cognitivecomputations/dolphin-3.0-r1-mistral-24b:free',
+      'huggingfaceh4/zephyr-7b-beta:free',
+      'openchat/openchat-7b:free',
+      'undi95/toppy-m-7b:free',
+      'nousresearch/hermes-3-llama-3.1-405b:free'
     ],
     rateLimit: { rpm: 20, rpd: '50 (1,000 with $10 topup)' },
     format: 'openai',
@@ -73,19 +86,22 @@ const PROVIDER_DEFS = {
   google_ai: {
     name: 'Google AI Studio', icon: '🔮',
     baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai',
-    defaultModel: 'gemini-2.5-flash-lite-preview-06-17',
+    defaultModel: 'gemini-2.5-flash',
     models: [
-      'gemini-2.5-flash-lite-preview-06-17',
       'gemini-2.5-flash',
-      'gemma-3-27b-it',
-      'gemma-3-12b-it',
-      'gemma-3-4b-it',
-      'gemma-3-1b-it',
+      'gemini-2.0-flash',
+      'gemini-2.0-flash-lite-preview-02-05',
+      'gemini-2.0-pro-exp-02-05',
+      'gemini-2.0-flash-thinking-exp-01-21',
+      'gemini-1.5-pro',
+      'gemini-1.5-flash',
+      'gemini-1.5-flash-8b',
+      'gemini-1.0-pro'
     ],
-    rateLimit: { rpm: 15, rpd: '500 (Flash-Lite) · 20 (Flash)' },
+    rateLimit: { rpm: 15, rpd: '1,500' },
     format: 'openai',
     signupUrl: 'https://aistudio.google.com',
-    freeInfo: '500 req/day (Flash-Lite) · 20 req/day (Gemini Flash)',
+    freeInfo: '1,500 req/day (Flash) · 50 req/day (Pro)',
     note: 'Data used for training outside EU/EEA/UK/CH. Use Flash-Lite for high volume.',
   },
 
@@ -96,11 +112,21 @@ const PROVIDER_DEFS = {
     models: [
       'meta/llama-3.3-70b-instruct',
       'meta/llama-3.1-8b-instruct',
-      'mistralai/mistral-7b-instruct-v0.3',
+      'meta/llama-3.1-70b-instruct',
+      'meta/llama-3.1-405b-instruct',
+      'meta/llama-3.2-3b-instruct',
+      'meta/llama-3.2-1b-instruct',
+      'mistralai/mistral-large-2-instruct',
+      'mistralai/mistral-nemo-12b-instruct',
+      'mistralai/mixtral-8x7b-instruct-v0.1',
+      'mistralai/mixtral-8x22b-instruct-v0.1',
+      'google/gemma-2-9b-it',
+      'google/gemma-2-27b-it',
+      'qwen/qwen2.5-7b-instruct',
       'qwen/qwen2.5-72b-instruct',
-      'google/gemma-3-27b-it',
+      'qwen/qwen2.5-coder-32b-instruct',
       'nvidia/nemotron-4-340b-instruct',
-      'deepseek-ai/deepseek-r1',
+      'deepseek-ai/deepseek-r1'
     ],
     rateLimit: { rpm: 40 },
     format: 'openai',
@@ -114,11 +140,15 @@ const PROVIDER_DEFS = {
     baseURL: 'https://api.mistral.ai/v1',
     defaultModel: 'mistral-small-latest',
     models: [
+      'mistral-large-latest',
       'mistral-small-latest',
       'open-mistral-nemo',
       'open-mixtral-8x7b',
       'open-mixtral-8x22b',
-      'mistral-large-latest',
+      'pixtral-large-latest',
+      'pixtral-12b-2409',
+      'ministral-3b-latest',
+      'ministral-8b-latest'
     ],
     rateLimit: { rps: 1, rpm_tokens: '500,000' },
     format: 'openai',
@@ -131,7 +161,11 @@ const PROVIDER_DEFS = {
     name: 'Mistral Codestral', icon: '💻',
     baseURL: 'https://codestral.mistral.ai/v1',
     defaultModel: 'codestral-latest',
-    models: ['codestral-latest'],
+    models: [
+      'codestral-latest',
+      'codestral-2405',
+      'codestral-2501'
+    ],
     rateLimit: { rpm: 30, rpd: '2,000' },
     format: 'openai',
     signupUrl: 'https://codestral.mistral.ai',
@@ -146,10 +180,20 @@ const PROVIDER_DEFS = {
     models: [
       'meta-llama/Llama-3.3-70B-Instruct',
       'meta-llama/Llama-3.2-3B-Instruct',
+      'meta-llama/Llama-3.2-1B-Instruct',
+      'meta-llama/Meta-Llama-3-8B-Instruct',
       'mistralai/Mistral-7B-Instruct-v0.3',
+      'mistralai/Mixtral-8x7B-Instruct-v0.1',
+      'mistralai/Mistral-Nemo-Instruct-2407',
       'Qwen/Qwen2.5-72B-Instruct',
+      'Qwen/Qwen2.5-7B-Instruct',
+      'Qwen/Qwen2.5-Coder-32B-Instruct',
+      'google/gemma-2-2b-it',
+      'google/gemma-2-9b-it',
       'google/gemma-2-27b-it',
-      'microsoft/Phi-4-mini-instruct',
+      'microsoft/Phi-3.5-mini-instruct',
+      'deepseek-ai/DeepSeek-R1-Distill-Qwen-32B',
+      'deepseek-ai/DeepSeek-R1-Distill-Llama-70B'
     ],
     rateLimit: { note: '$0.10/month in free credits' },
     format: 'openai',
@@ -161,13 +205,16 @@ const PROVIDER_DEFS = {
   cohere: {
     name: 'Cohere', icon: '🌊',
     baseURL: 'https://api.cohere.ai/v1',
-    defaultModel: 'command-r-08-2024',
+    defaultModel: 'command-r-plus-08-2024',
     models: [
-      'command-r-08-2024',
       'command-r-plus-08-2024',
-      'command-a-03-2025',
-      'command-r7b-12-2024',
-      'command-r7b-arabic-02-2025',
+      'command-r-08-2024',
+      'command-r-plus',
+      'command-r',
+      'command-light',
+      'command',
+      'c4ai-aya-expanse-8b',
+      'c4ai-aya-expanse-32b'
     ],
     rateLimit: { rpm: 20, rpm_month: '1,000' },
     format: 'cohere',
@@ -182,14 +229,28 @@ const PROVIDER_DEFS = {
     defaultModel: 'meta-llama/Llama-3.3-70B-Instruct',
     models: [
       'meta-llama/Llama-3.3-70B-Instruct',
-      'openai/gpt-4o-mini',
+      'meta-llama/Llama-3.2-90B-Vision-Instruct',
+      'meta-llama/Llama-3.2-11B-Vision-Instruct',
+      'meta-llama/Meta-Llama-3.1-405B-Instruct',
+      'meta-llama/Meta-Llama-3.1-70B-Instruct',
+      'meta-llama/Meta-Llama-3.1-8B-Instruct',
       'openai/gpt-4o',
-      'mistral-ai/Mistral-small',
-      'deepseek/DeepSeek-R1',
-      'Phi-4',
-      'Phi-4-mini-instruct',
+      'openai/gpt-4o-mini',
+      'openai/o1',
       'openai/o1-mini',
       'openai/o3-mini',
+      'mistral-ai/Mistral-large',
+      'mistral-ai/Mistral-large-2407',
+      'mistral-ai/Mistral-small',
+      'mistral-ai/Mistral-Nemo',
+      'deepseek/DeepSeek-R1',
+      'Cohere/command-r-plus-08-2024',
+      'Cohere/command-r-08-2024',
+      'microsoft/Phi-3.5-MoE-instruct',
+      'microsoft/Phi-3.5-mini-instruct',
+      'microsoft/Phi-4',
+      'AI21/jamba-1.5-large',
+      'AI21/jamba-1.5-mini'
     ],
     rateLimit: { rpm: 15, rpd: '150 (free) · higher with Copilot plan' },
     format: 'openai',
@@ -204,12 +265,27 @@ const PROVIDER_DEFS = {
     defaultModel: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
     models: [
       '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
-      '@cf/qwen/qwen2.5-coder-32b-instruct',
-      '@cf/google/gemma-4-26b-a4b-it',
-      '@cf/openai/gpt-oss-120b',
-      '@cf/moonshotai/kimi-k2.5',
-      '@cf/moonshotai/kimi-k2.6',
-      '@cf/qwen/qwen3-30b-a3b-fp8',
+      '@cf/meta/llama-3.1-8b-instruct',
+      '@cf/meta/llama-3.1-8b-instruct-fp8',
+      '@cf/meta/llama-3.1-8b-instruct-awq',
+      '@cf/meta/llama-3.2-1b-instruct',
+      '@cf/meta/llama-3.2-3b-instruct',
+      '@cf/meta/llama-3-8b-instruct',
+      '@cf/meta/llama-2-7b-chat-int8',
+      '@cf/mistral/mistral-7b-instruct-v0.2',
+      '@hf/mistral/mistral-7b-instruct-v0.2',
+      '@cf/google/gemma-2b-it-lora',
+      '@cf/google/gemma-7b-it-lora',
+      '@cf/qwen/qwen1.5-0.5b-chat',
+      '@cf/qwen/qwen1.5-1.8b-chat',
+      '@cf/qwen/qwen1.5-7b-chat-awq',
+      '@cf/qwen/qwen1.5-14b-chat-awq',
+      '@cf/microsoft/phi-2',
+      '@cf/tinyllama/tinyllama-1.1b-chat-v1.0',
+      '@cf/openchat/openchat-3.5-0106',
+      '@cf/thebloke/discolm-german-7b-v1-awq',
+      '@hf/nousresearch/hermes-2-pro-mistral-7b',
+      '@cf/deepseek-ai/deepseek-math-7b-instruct'
     ],
     rateLimit: { rpd: '10,000 neurons/day' },
     format: 'cloudflare',
@@ -244,6 +320,92 @@ for (const [id, prefix] of Object.entries(ENV_PREFIXES)) {
 if (process.env.CF_DEFAULT_MODEL) PROVIDER_DEFS.cloudflare.defaultModel = process.env.CF_DEFAULT_MODEL;
 
 // ─────────────────────────────────────────────────────────────────────────────
+//  SMART ROUTER: MODEL TIERS & SCORING ENGINE
+// ─────────────────────────────────────────────────────────────────────────────
+const MODEL_TIERS = {
+  // Tier 1 (Light & Fast)
+  'llama-3.1-8b-instant': 1, 'llama3.1-8b': 1, 'meta/llama-3.1-8b-instruct': 1,
+  'meta-llama/llama-3.2-3b-instruct:free': 1, 'meta-llama/Llama-3.2-3B-Instruct': 1,
+  'meta-llama/llama-3.1-8b-instruct:free': 1, 'meta-llama/llama-3.2-1b-instruct:free': 1,
+  'meta-llama/Llama-3.2-1B-Instruct': 1, 'meta-llama/Meta-Llama-3-8B-Instruct': 1,
+  'meta-llama/Meta-Llama-3.1-8B-Instruct': 1, 'llama3-8b-8192': 1,
+  'gemma2-9b-it': 1, 'google/gemma-2-9b-it:free': 1, 'google/gemma-2-9b-it': 1,
+  'google/gemma-2-2b-it': 1, 'gemma-3-4b-it': 1, 'gemma-3-1b-it': 1,
+  'mistral-small-latest': 1, 'mistral-ai/Mistral-small': 1,
+  'mistralai/mistral-7b-instruct:free': 1, 'mistralai/Mistral-7B-Instruct-v0.3': 1,
+  'mistralai/mistral-nemo-12b-instruct': 1, 'mistralai/Mistral-Nemo-Instruct-2407': 1,
+  'open-mistral-nemo': 1, 'mistral-ai/Mistral-Nemo': 1,
+  'ministral-3b-latest': 1, 'ministral-8b-latest': 1,
+  'microsoft/phi-3-mini-128k-instruct:free': 1, 'microsoft/Phi-3.5-mini-instruct': 1,
+  'microsoft/Phi-3.5-MoE-instruct': 1, 'Phi-4-mini-instruct': 1,
+  'qwen/qwen-2.5-7b-instruct:free': 1, 'qwen/qwen2.5-7b-instruct': 1, 'Qwen/Qwen2.5-7B-Instruct': 1,
+  'openai/gpt-4o-mini': 1, 'gemini-2.5-flash-lite-preview-06-17': 1,
+  'gemini-2.5-flash': 1, 'gemini-2.0-flash': 1, 'gemini-2.0-flash-lite-preview-02-05': 1,
+  'gemini-1.5-flash': 1, 'gemini-1.5-flash-8b': 1,
+  'command-light': 1, 'c4ai-aya-expanse-8b': 1, 'command-r7b-12-2024': 1,
+  '@cf/meta/llama-3.1-8b-instruct': 1, '@cf/meta/llama-3.1-8b-instruct-fp8': 1,
+  '@cf/meta/llama-3.1-8b-instruct-awq': 1, '@cf/meta/llama-3.2-1b-instruct': 1,
+  '@cf/meta/llama-3.2-3b-instruct': 1, '@cf/meta/llama-3-8b-instruct': 1,
+  '@cf/meta/llama-2-7b-chat-int8': 1, '@cf/mistral/mistral-7b-instruct-v0.2': 1,
+  '@hf/mistral/mistral-7b-instruct-v0.2': 1, '@cf/google/gemma-2b-it-lora': 1,
+  '@cf/google/gemma-7b-it-lora': 1, '@cf/qwen/qwen1.5-0.5b-chat': 1,
+  '@cf/qwen/qwen1.5-1.8b-chat': 1, '@cf/qwen/qwen1.5-7b-chat-awq': 1,
+  '@cf/microsoft/phi-2': 1, '@cf/tinyllama/tinyllama-1.1b-chat-v1.0': 1,
+
+  // Tier 3 (Heavy Duty / Code / Reasoning)
+  'deepseek-ai/deepseek-r1': 3, 'deepseek/DeepSeek-R1': 3, 'deepseek/deepseek-r1:free': 3,
+  'deepseek-ai/DeepSeek-R1-Distill-Llama-70B': 3, 'deepseek-r1-distill-llama-70b': 3,
+  'openai/gpt-4o': 3, 'openai/o1': 3, 'openai/o1-mini': 3, 'openai/o3-mini': 3,
+  'meta-llama/llama-3.3-70b-instruct:free': 3, 'llama-3.3-70b-versatile': 3,
+  'meta-llama/Llama-3.3-70B-Instruct': 3, 'meta/llama-3.3-70b-instruct': 3,
+  'llama3.1-70b': 3, 'llama3.3-70b': 3, 'meta-llama/Meta-Llama-3.1-70B-Instruct': 3,
+  'meta-llama/Meta-Llama-3.1-405B-Instruct': 3, 'meta/llama-3.1-70b-instruct': 3,
+  'meta/llama-3.1-405b-instruct': 3, 'nousresearch/hermes-3-llama-3.1-405b:free': 3,
+  'qwen/qwen-2.5-72b-instruct:free': 3, 'qwen/qwen2.5-72b-instruct': 3, 'Qwen/Qwen2.5-72B-Instruct': 3,
+  'qwen/qwen2.5-coder-32b-instruct': 3, 'Qwen/Qwen2.5-Coder-32B-Instruct': 3, 'qwen/qwen3-coder:free': 3,
+  'codestral-latest': 3, 'codestral-2405': 3, 'codestral-2501': 3,
+  'mistral-large-latest': 3, 'mistralai/mistral-large-2-instruct': 3, 'mistral-ai/Mistral-large': 3,
+  'mistral-ai/Mistral-large-2407': 3, 'pixtral-large-latest': 3,
+  'nvidia/nemotron-4-340b-instruct': 3, 'nvidia/nemotron-3-super-120b-a12b:free': 3,
+  'gemini-1.5-pro': 3, 'gemini-2.0-pro-exp-02-05': 3, 'gemini-2.0-flash-thinking-exp-01-21': 3,
+  'command-r-plus-08-2024': 3, 'command-r-plus': 3, 'Cohere/command-r-plus-08-2024': 3,
+  '@cf/meta/llama-3.3-70b-instruct-fp8-fast': 3,
+  // All others default to Tier 2
+};
+
+function analyzePrompt(messages) {
+  let text = '';
+  for (const m of messages) if (typeof m.content === 'string') text += m.content + '\n';
+  
+  let score = 0;
+  const paragraphs = text.split(/\n\s*\n/).length;
+  score += Math.min(paragraphs * 2, 20); // up to 20
+  
+  const tokenEst = text.length / 4;
+  score += Math.min((tokenEst / 500) * 2, 10); // up to 10
+  
+  const codeBlocks = (text.match(/```/g) || []).length / 2;
+  score += Math.min(codeBlocks * 10, 20); // up to 20
+  
+  const codeRegex = /\b(function|def|class|struct|interface|import|export|#include|async|await|public|private)\b/g;
+  score += Math.min((text.match(codeRegex) || []).length * 2, 20); // up to 20
+  
+  const logicRegex = /\b(calculate|evaluate|analyze|synthesize|deduce|matrix|derivative|integral|equation|formula|pros and cons|step by step)\b/gi;
+  score += Math.min((text.match(logicRegex) || []).length * 5, 30); // up to 30
+  
+  const nonAscii = (text.match(/[^\x00-\x7F]/g) || []).length;
+  if (nonAscii > 50) score += 10; // up to 10
+  
+  return Math.min(Math.round(score), 100);
+}
+
+function getTargetTier(score) {
+  if (score <= 30) return 1;
+  if (score <= 70) return 2;
+  return 3;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 //  KEY POOL — every (provider, key) pair is one independent rotation slot
 // ─────────────────────────────────────────────────────────────────────────────
 function loadKeyPool() {
@@ -255,12 +417,19 @@ function loadKeyPool() {
       const envVar = i === 1 ? envPrefix : `${envPrefix}_${i}`;
       const key = process.env[envVar];
       if (key && key.trim()) {
+        const basePrefix = envPrefix.replace(/_API_KEY|_TOKEN|_KEY$/, '');
+        const inAutoPool = process.env[`${basePrefix}_AUTO_POOL`] !== 'false';
+        const defModel = PROVIDER_DEFS[providerId].defaultModel;
+        const tier = MODEL_TIERS[defModel] || 2;
+
         pool.push({
           slotId: `${providerId}#${i}`,
           providerId,
           keyIndex: i,
           apiKey: key.trim(),
           baseURL: PROVIDER_DEFS[providerId].baseURL,
+          inAutoPool,
+          tier,
           stats: { success: 0, failure: 0, rateLimited: 0, lastUsed: null },
         });
       }
@@ -273,12 +442,18 @@ function loadKeyPool() {
     const accountId = process.env[`CF_ACCOUNT_ID${s}`];
     const apiKey    = process.env[`CF_API_KEY${s}`];
     if (accountId && apiKey) {
+      const inAutoPool = process.env.CF_AUTO_POOL !== 'false';
+      const defModel = PROVIDER_DEFS.cloudflare.defaultModel;
+      const tier = MODEL_TIERS[defModel] || 2;
+      
       pool.push({
         slotId: `cloudflare#${i}`,
         providerId: 'cloudflare',
         keyIndex: i,
         apiKey,
         baseURL: `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/v1`,
+        inAutoPool,
+        tier,
         stats: { success: 0, failure: 0, rateLimited: 0, lastUsed: null },
       });
     }
@@ -299,10 +474,10 @@ const state = {
   ),
 };
 
-function getNextSlot(excludeSlotIds = []) {
+function getNextSlot(excludeSlotIds = [], filterFn = () => true) {
   const now = Date.now();
   const available = KEY_POOL.filter(
-    s => !excludeSlotIds.includes(s.slotId) && !(cooldowns[s.slotId] > now)
+    s => !excludeSlotIds.includes(s.slotId) && !(cooldowns[s.slotId] > now) && filterFn(s)
   );
   if (!available.length) return null;
   state.poolIndex = (state.poolIndex + 1) % available.length;
@@ -392,15 +567,48 @@ app.post('/v1/chat/completions', async (req, res) => {
   const triedSlots  = [];
   const maxAttempts = Math.min(KEY_POOL.length, 30);
 
+  const routingMode = process.env.ROUTING_MODE || 'smart';
+  const customModels = (process.env.CUSTOM_POOL_MODELS || '').split(',').map(m => m.trim()).filter(Boolean);
+
+  let targetTier = null;
+  if (model === 'auto' && routingMode === 'smart') {
+    const score = analyzePrompt(messages);
+    targetTier = getTargetTier(score);
+  }
+
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const slot = getNextSlot(triedSlots);
+    let slot;
+    let activeModel = model;
+    
+    if (model === 'auto') {
+      if (routingMode === 'custom' && customModels.length > 0) {
+        slot = getNextSlot(triedSlots, s => PROVIDER_DEFS[s.providerId].models.some(m => customModels.includes(m)));
+        if (slot) {
+          activeModel = customModels.find(m => PROVIDER_DEFS[slot.providerId].models.includes(m));
+        }
+      } else {
+        slot = getNextSlot(triedSlots, s => s.inAutoPool && s.tier === targetTier);
+        if (!slot) {
+          const fallbacks = [2, 3, 1].filter(t => t !== targetTier);
+          slot = getNextSlot(triedSlots, s => s.inAutoPool && s.tier === fallbacks[0]);
+          if (!slot) slot = getNextSlot(triedSlots, s => s.inAutoPool && s.tier === fallbacks[1]);
+        }
+        if (!slot) slot = getNextSlot(triedSlots, s => s.inAutoPool);
+      }
+    } else if (model && model !== 'router-default') {
+      slot = getNextSlot(triedSlots, s => PROVIDER_DEFS[s.providerId].models.includes(model));
+    }
+    
+    // Ultimate fallback if nothing specific matched
+    if (!slot) slot = getNextSlot(triedSlots);
+
     if (!slot) break;
 
     triedSlots.push(slot.slotId);
     slot.stats.lastUsed = new Date().toISOString();
 
     try {
-      const result = await callSlot(slot, messages, model, { max_tokens, temperature });
+      const result = await callSlot(slot, messages, activeModel, { max_tokens, temperature });
       slot.stats.success++;
       state.providerStats[slot.providerId].success++;
 
@@ -489,9 +697,9 @@ app.get('/api/settings', (req, res) => {
   const envMap = {};
   const allPrefixes = Object.values(ENV_PREFIXES).concat(['CF_ACCOUNT_ID', 'CF_API_KEY']);
   for (const k of Object.keys(process.env)) {
-    if (allPrefixes.some(prefix => k.startsWith(prefix)) || k.endsWith('_DEFAULT_MODEL')) {
+    if (allPrefixes.some(prefix => k.startsWith(prefix)) || k.endsWith('_DEFAULT_MODEL') || k.endsWith('_AUTO_POOL') || k === 'ROUTING_MODE' || k === 'CUSTOM_POOL_MODELS') {
       const val = process.env[k];
-      envMap[k] = k.endsWith('_DEFAULT_MODEL') ? val : (val && val.length > 8 ? val.substring(0,4) + '...' + val.substring(val.length-4) : val);
+      envMap[k] = (k.endsWith('_DEFAULT_MODEL') || k.endsWith('_AUTO_POOL') || k === 'ROUTING_MODE' || k === 'CUSTOM_POOL_MODELS') ? val : (val && val.length > 8 ? val.substring(0,4) + '...' + val.substring(val.length-4) : val);
     }
   }
   res.json({ env: envMap });

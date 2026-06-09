@@ -121,6 +121,14 @@
   .tour-btn { background: rgba(0,0,0,0.1); border: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-weight: 500; cursor: pointer; font-family: var(--font-sans); }
   .tour-btn:hover { background: rgba(0,0,0,0.2); }
   .tour-btn-skip { background: transparent; color: var(--primary-inv); opacity: 0.6; }
+  
+  /* Tabs */
+  .tab-btn { background:transparent; border:none; color:var(--text-muted); font-size:0.95rem; font-weight:500; padding:0.75rem 0; cursor:pointer; font-family:var(--font-sans); border-bottom:2px solid transparent; transition:all 0.2s; }
+  .tab-btn.active { color:var(--primary); border-bottom-color:var(--primary); }
+  .tab-btn:hover:not(.active) { color:var(--text); }
+  .tab-content { display:none; }
+  .tab-content.active { display:block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
 </style>
 </head>
 <body>
@@ -131,23 +139,27 @@
     <div class="subtitle">11 free providers · multi-key pool · round-robin · auto-fallback</div>
   </header>
 
-  <div class="ep-bar" id="tour-endpoint">
-    <span class="method">POST</span>
-    <span class="url" id="ep-url"></span>
-    <button class="copy-btn" onclick="copyEp()">Copy URL</button>
+  <div class="tabs" style="display:flex; gap:1.5rem; margin-bottom:2rem; border-bottom:1px solid var(--border);">
+    <button class="tab-btn active" onclick="switchTab('dashboard')" id="tab-btn-dashboard">Dashboard</button>
+    <button class="tab-btn" onclick="switchTab('providers')" id="tab-btn-providers">Providers</button>
+    <button class="tab-btn" onclick="switchTab('routing')" id="tab-btn-routing">Routing Strategies</button>
   </div>
 
-  <div class="stats-grid">
-    <div class="stat-card"><div class="stat-label">Pool Slots</div><div class="stat-val" id="s-slots">—</div></div>
-    <div class="stat-card"><div class="stat-label">Active Keys</div><div class="stat-val" id="s-active">—</div></div>
-    <div class="stat-card"><div class="stat-label">Total Requests</div><div class="stat-val" id="s-total">—</div></div>
-    <div class="stat-card"><div class="stat-label">Success</div><div class="stat-val" style="color:#a7f3d0" id="s-ok">—</div></div>
-  </div>
+  <div id="tab-dashboard" class="tab-content active">
+    <div class="ep-bar" id="tour-endpoint">
+      <span class="method">POST</span>
+      <span class="url" id="ep-url"></span>
+      <button class="copy-btn" onclick="copyEp()">Copy URL</button>
+    </div>
 
-  <div class="sec-title">Providers</div>
-  <div class="pgrid" id="pgrid"></div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Pool Slots</div><div class="stat-val" id="s-slots">—</div></div>
+      <div class="stat-card"><div class="stat-label">Active Keys</div><div class="stat-val" id="s-active">—</div></div>
+      <div class="stat-card"><div class="stat-label">Total Requests</div><div class="stat-val" id="s-total">—</div></div>
+      <div class="stat-card"><div class="stat-label">Success</div><div class="stat-val" style="color:#a7f3d0" id="s-ok">—</div></div>
+    </div>
 
-  <div class="sec-title">Playground</div>
+    <div class="sec-title">Playground</div>
   <div class="test-panel" id="tour-test">
     <div class="test-body">
       <div>
@@ -169,13 +181,54 @@
     </div>
   </div>
 
-  <div class="sec-title">Recent Logs</div>
-  <div class="log-wrap">
-    <table>
-      <thead><tr><th>Time</th><th>Provider</th><th>Key</th><th>Model</th><th>Tokens</th><th>Tries</th></tr></thead>
-      <tbody id="log-body"></tbody>
-    </table>
-  </div>
+    <div class="sec-title">Recent Logs</div>
+    <div class="log-wrap">
+      <table>
+        <thead><tr><th>Time</th><th>Provider</th><th>Key</th><th>Model</th><th>Tokens</th><th>Tries</th></tr></thead>
+        <tbody id="log-body"></tbody>
+      </table>
+    </div>
+  </div> <!-- End Tab Dashboard -->
+
+  <div id="tab-providers" class="tab-content">
+    <div class="sec-title">Provider API Keys</div>
+    <div class="pgrid" id="pgrid"></div>
+  </div> <!-- End Tab Providers -->
+
+  <div id="tab-routing" class="tab-content">
+    <div class="sec-title">Routing Mode</div>
+    <div class="routing-mode-cards" style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:2rem;">
+      <div class="rcard" id="rcard-smart" onclick="setRoutingMode('smart')" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem; cursor:pointer; transition:all 0.2s;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem;">
+          <div style="font-weight:600; color:var(--primary); font-size:1.1rem;">🧠 Smart Auto</div>
+          <div class="rmode-indicator" id="rmode-ind-smart" style="width:20px; height:20px; border-radius:50%; border:2px solid var(--text-muted); transition:all 0.2s;"></div>
+        </div>
+        <div style="font-size:0.85rem; color:var(--text-muted);">Dynamically scores prompts by complexity and automatically routes to the best model tier (Fast vs Heavy Reasoning).</div>
+      </div>
+      
+      <div class="rcard" id="rcard-custom" onclick="setRoutingMode('custom')" style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem; cursor:pointer; transition:all 0.2s;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1rem;">
+          <div style="font-weight:600; color:var(--primary); font-size:1.1rem;">⚙️ Custom Pool</div>
+          <div class="rmode-indicator" id="rmode-ind-custom" style="width:20px; height:20px; border-radius:50%; border:2px solid var(--text-muted); transition:all 0.2s;"></div>
+        </div>
+        <div style="font-size:0.85rem; color:var(--text-muted);">Select specific models. The router will exclusively load-balance across providers that support them.</div>
+      </div>
+    </div>
+
+    <div id="custom-pool-section" style="display:none; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem;">
+      <div style="font-weight:600; margin-bottom:1rem; color:var(--primary);">Manage Custom Pool</div>
+      <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+        <select id="custom-model-select" style="flex:1;">
+          <option value="">Loading models...</option>
+        </select>
+        <button class="btn btn-secondary" onclick="addCustomModel()">Add to Pool</button>
+      </div>
+      <div id="custom-model-tags" style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1.5rem;"></div>
+      <div id="custom-pool-coverage" style="font-size:0.85rem; color:var(--text-muted); background:var(--bg); padding:1rem; border-radius:6px; border:1px solid var(--border);">
+        Add models above to see which providers support them.
+      </div>
+    </div>
+  </div> <!-- End Tab Routing -->
 
   <footer style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); text-align: center;">
     <div style="font-weight: 500; color: #fca5a5; margin-bottom: 1rem; font-size: 0.85rem; display:flex; align-items:center; justify-content:center; gap:0.5rem;">
@@ -272,6 +325,74 @@ let currentEnv = {};
 let tourActive = false;
 let tourInitialized = false;
 
+// Routing State
+let routingMode = 'smart';
+let customModels = [];
+
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById(`tab-btn-${tabId}`).classList.add('active');
+  document.getElementById(`tab-${tabId}`).classList.add('active');
+}
+
+function setRoutingMode(mode, skipSave=false) {
+  routingMode = mode;
+  document.getElementById('rcard-smart').style.borderColor = mode === 'smart' ? 'var(--primary)' : 'var(--border)';
+  document.getElementById('rmode-ind-smart').style.background = mode === 'smart' ? 'var(--primary)' : 'transparent';
+  document.getElementById('rmode-ind-smart').style.borderColor = mode === 'smart' ? 'var(--primary)' : 'var(--text-muted)';
+  
+  document.getElementById('rcard-custom').style.borderColor = mode === 'custom' ? 'var(--primary)' : 'var(--border)';
+  document.getElementById('rmode-ind-custom').style.background = mode === 'custom' ? 'var(--primary)' : 'transparent';
+  document.getElementById('rmode-ind-custom').style.borderColor = mode === 'custom' ? 'var(--primary)' : 'var(--text-muted)';
+  
+  document.getElementById('custom-pool-section').style.display = mode === 'custom' ? 'block' : 'none';
+  if (!skipSave) saveRoutingSettings();
+}
+
+async function saveRoutingSettings() {
+  const updates = { ROUTING_MODE: routingMode, CUSTOM_POOL_MODELS: customModels.join(',') };
+  await fetch(`${BASE}/api/settings`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(updates) });
+}
+
+function addCustomModel() {
+  const m = document.getElementById('custom-model-select').value;
+  if (m && !customModels.includes(m)) {
+    customModels.push(m);
+    renderCustomPool();
+    saveRoutingSettings();
+  }
+}
+
+function removeCustomModel(m) {
+  customModels = customModels.filter(x => x !== m);
+  renderCustomPool();
+  saveRoutingSettings();
+}
+
+function renderCustomPool() {
+  document.getElementById('custom-model-tags').innerHTML = customModels.map(m => 
+    `<span style="background:var(--surface2); border:1px solid var(--border); padding:0.25rem 0.5rem; border-radius:6px; font-size:0.8rem; display:inline-flex; align-items:center; gap:0.5rem;">
+      <span style="font-family:var(--font-mono)">${m}</span> 
+      <button onclick="removeCustomModel('${m}')" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1rem;margin-left:0.25rem;">×</button>
+    </span>`
+  ).join('');
+  
+  const coverage = new Set();
+  for (const p of Object.values(providersData)) {
+    if (customModels.some(m => p.models.includes(m)) && p.keyCount > 0) coverage.add(p.name);
+  }
+  
+  const covDiv = document.getElementById('custom-pool-coverage');
+  if (customModels.length === 0) {
+    covDiv.innerHTML = 'Add models above to see which providers support them.';
+  } else if (coverage.size === 0) {
+    covDiv.innerHTML = '<span style="color:#fca5a5">Warning: None of your active configured providers support these models. Requests will fail.</span>';
+  } else {
+    covDiv.innerHTML = `Your custom pool is supported by <strong>${coverage.size} active provider(s)</strong>: <span style="color:var(--primary)">${Array.from(coverage).join(', ')}</span>`;
+  }
+}
+
 async function load(){
   if (tourActive) return; // Pause live updates while tutorial is running so DOM doesn't rebuild and break highlights
   
@@ -324,6 +445,25 @@ async function load(){
       </tr>`).join('');
     }
     
+    // Populate Routing Models Dropdown
+    const allModels = new Set();
+    for (const p of Object.values(d.providers)) p.models.forEach(m => allModels.add(m));
+    const select = document.getElementById('custom-model-select');
+    const curVal = select.value;
+    select.innerHTML = Array.from(allModels).sort().map(m => `<option value="${m}">${m}</option>`).join('');
+    if (curVal && allModels.has(curVal)) select.value = curVal;
+    
+    // Initialize Routing State once
+    if (!window._routingInit) {
+      window._routingInit = true;
+      routingMode = currentEnv['ROUTING_MODE'] || 'smart';
+      customModels = (currentEnv['CUSTOM_POOL_MODELS'] || '').split(',').map(x=>x.trim()).filter(Boolean);
+      setRoutingMode(routingMode, true);
+      renderCustomPool();
+    } else {
+      renderCustomPool(); // Update coverage dynamically if keys change
+    }
+    
     if (!tourInitialized) {
       tourInitialized = true;
       setTimeout(initTutorial, 500);
@@ -353,7 +493,12 @@ function openConfig(id) {
       <input id="cfg-model-custom" type="text" value="${isCustom ? p.defaultModel : ''}" placeholder="Enter custom model name (e.g. org/model)">
     </div>
     <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.3rem">Original Fallback: ${p.models[0]}</div>
-  </div><hr style="border:0;border-top:1px solid var(--border);margin:1.5rem 0">`;
+  </div>
+  <div class="field" style="display:flex; align-items:center; gap:0.5rem; margin-top:1rem;">
+    <input type="checkbox" id="cfg-auto-pool" ${currentEnv[id === 'cloudflare' ? 'CF_AUTO_POOL' : prefix.replace(/_API_KEY|_TOKEN|_KEY$/, '') + '_AUTO_POOL'] !== 'false' ? 'checked' : ''}>
+    <label style="margin:0; cursor:pointer; color:var(--text);" for="cfg-auto-pool">Include in "Smart Auto" Routing Pool</label>
+  </div>
+  <hr style="border:0;border-top:1px solid var(--border);margin:1.5rem 0">`;
   
   if (id === 'cloudflare') {
     html += `<div class="field"><label>Account ID (Main)</label><input id="cfg-cf-acc-1" placeholder="${currentEnv['CF_ACCOUNT_ID'] ? '[Configured]' : 'Enter Account ID'}"></div>`;
@@ -384,6 +529,10 @@ async function saveConfig() {
   const mVal = selectVal === 'custom' ? customVal : selectVal;
   
   if (mVal && mVal !== p.defaultModel) updates[modelKey] = mVal;
+  
+  const autoKey = id === 'cloudflare' ? 'CF_AUTO_POOL' : prefix.replace(/_API_KEY|_TOKEN|_KEY$/, '') + '_AUTO_POOL';
+  const autoVal = document.getElementById('cfg-auto-pool').checked ? 'true' : 'false';
+  if (currentEnv[autoKey] !== autoVal) updates[autoKey] = autoVal;
   
   if (id === 'cloudflare') {
     const acc1 = document.getElementById('cfg-cf-acc-1')?.value.trim();
@@ -424,7 +573,7 @@ async function runTest(){
   try{
     const res=await fetch(`${BASE}/v1/chat/completions`,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({messages:msgs,max_tokens:256})
+      body:JSON.stringify({model:'auto', messages:msgs,max_tokens:256})
     });
     const data=await res.json();
     const el=((Date.now()-t0)/1000).toFixed(2);

@@ -3,201 +3,200 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LLM Router — Free Providers</title>
+<title>LLM Router — Core</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Syne:wght@400;600;700;800&display=swap');
-:root{
-  --bg:#08080f;--surface:#0f0f1a;--surface2:#161625;--border:#1d1d2e;
-  --accent:#6ee7b7;--accent2:#818cf8;--warn:#fbbf24;--danger:#f87171;--info:#38bdf8;
-  --muted:#3a3a58;--text:#e2e8f0;--text-dim:#64748b;
-  --mono:'JetBrains Mono',monospace;--sans:'Syne',sans-serif;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
-body::before{content:'';position:fixed;inset:0;
-  background-image:linear-gradient(rgba(110,231,183,.02) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(110,231,183,.02) 1px,transparent 1px);
-  background-size:48px 48px;pointer-events:none;z-index:0}
-.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:2rem 1.5rem}
+  :root {
+    --bg: #0c0c0d;
+    --surface: #131315;
+    --surface2: #1c1c1f;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 255, 255, 0.16);
+    --text: #ededed;
+    --text-muted: #888888;
+    --primary: #ffffff;
+    --primary-inv: #000000;
+    --font-sans: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-sans); min-height: 100vh; line-height: 1.5; font-size: 14px; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 3rem 1.5rem; position: relative; }
+  
+  /* Header */
+  header { margin-bottom: 3rem; }
+  h1 { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; color: var(--primary); display: flex; align-items: center; gap: 0.5rem; }
+  .badge { font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 99px; background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); font-weight: 500; }
+  .subtitle { color: var(--text-muted); margin-top: 0.5rem; font-size: 0.9rem; }
+  
+  /* Endpoint Bar */
+  .ep-bar { display: flex; align-items: center; gap: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.75rem 1rem; margin-bottom: 2rem; }
+  .method { font-family: var(--font-mono); font-size: 0.75rem; font-weight: 500; color: var(--text-muted); }
+  .url { font-family: var(--font-mono); font-size: 0.85rem; color: var(--text); word-break: break-all; }
+  .copy-btn { margin-left: auto; background: transparent; border: 1px solid var(--border); color: var(--text); font-size: 0.75rem; padding: 0.35rem 0.75rem; border-radius: 6px; cursor: pointer; transition: all 0.2s; font-family: var(--font-sans); font-weight: 500; }
+  .copy-btn:hover { background: var(--surface2); border-color: var(--border-hover); }
 
-/* Header */
-header{display:flex;align-items:center;gap:1rem;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
-.logo{width:44px;height:44px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
-h1{font-size:1.65rem;font-weight:800;letter-spacing:-.03em}
-h1 em{color:var(--accent);font-style:normal}
-.subtitle{color:var(--text-dim);font-size:.72rem;font-family:var(--mono);margin-top:.15rem}
-.live-pill{margin-left:auto;padding:.3rem .9rem;border-radius:999px;font-family:var(--mono);font-size:.65rem;
-  background:rgba(110,231,183,.07);border:1px solid rgba(110,231,183,.2);color:var(--accent);
-  display:flex;align-items:center;gap:.45rem;white-space:nowrap;flex-shrink:0}
-.live-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:blink 2s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+  /* Stats */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 3rem; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; }
+  .stat-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+  .stat-val { font-size: 1.5rem; font-weight: 600; margin-top: 0.5rem; font-family: var(--font-mono); letter-spacing: -0.03em; }
 
-/* Endpoint bar */
-.ep-bar{display:flex;align-items:center;gap:.8rem;background:var(--surface);border:1px solid var(--border);
-  border-radius:10px;padding:.65rem 1.1rem;margin-bottom:1.5rem;font-family:var(--mono);font-size:.75rem;flex-wrap:wrap}
-.method{color:var(--accent);font-weight:700}
-.url{color:var(--accent2);word-break:break-all}
-.copy-btn{margin-left:auto;background:var(--surface2);border:1px solid var(--border);color:var(--text-dim);
-  font-family:var(--mono);font-size:.63rem;padding:.28rem .75rem;border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap}
-.copy-btn:hover{background:var(--border);color:var(--text)}
+  /* Sections */
+  .sec-title { font-size: 1rem; font-weight: 600; color: var(--primary); margin-bottom: 1.25rem; letter-spacing: -0.01em; }
+  
+  /* Providers */
+  .pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; margin-bottom: 3rem; }
+  .pcard { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); transition: border-color 0.2s, box-shadow 0.2s; }
+  .pcard:hover { border-color: var(--border-hover); }
+  .pcard-body { padding: 1.25rem; }
+  .ph { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+  .picon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; opacity: 0.8; }
+  .picon svg { width: 100%; height: 100%; fill: currentColor; }
+  .pname { font-weight: 600; font-size: 0.95rem; color: var(--primary); }
+  .pstatus { margin-left: auto; font-size: 0.7rem; font-weight: 500; padding: 0.2rem 0.5rem; border-radius: 4px; }
+  .status-on { background: rgba(255,255,255,0.05); color: var(--text); }
+  .status-off { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+  .btn-cfg { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 0.2rem; transition: color 0.2s; margin-left: 0.25rem; display: flex; align-items: center; }
+  .btn-cfg:hover { color: var(--primary); }
+  .btn-cfg svg { width: 16px; height: 16px; fill: currentColor; }
+  
+  .pinfo { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.4; }
+  .pmetrics { display: flex; gap: 1rem; }
+  .metric { flex: 1; }
+  .ml { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.25rem; }
+  .mv { font-family: var(--font-mono); font-size: 0.85rem; font-weight: 500; }
+  
+  /* Buttons & Inputs */
+  .btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 1rem; border-radius: 6px; font-family: var(--font-sans); font-weight: 500; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
+  .btn-primary { background: var(--primary); color: var(--primary-inv); }
+  .btn-primary:hover { background: #e0e0e0; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border-color: var(--border); }
+  .btn-secondary:hover { background: #222; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  
+  input, select, textarea { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: var(--font-sans); font-size: 0.85rem; padding: 0.5rem 0.75rem; transition: border-color 0.2s; outline: none; }
+  input:focus, select:focus, textarea:focus { border-color: #555; }
+  textarea { font-family: var(--font-mono); resize: vertical; min-height: 80px; }
+  
+  /* Test Panel */
+  .test-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 3rem; }
+  .test-body { padding: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  @media(max-width: 768px) { .test-body { grid-template-columns: 1fr; } }
+  .field { margin-bottom: 1rem; }
+  .field label { display: block; font-size: 0.75rem; font-weight: 500; color: var(--text-muted); margin-bottom: 0.4rem; }
+  .resp-box { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; font-family: var(--font-mono); font-size: 0.8rem; color: var(--text); min-height: 120px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; }
+  .resp-meta { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.75rem; font-family: var(--font-mono); }
 
-/* Stats row */
-.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.75rem;margin-bottom:1.8rem}
-.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:.9rem 1.1rem}
-.stat-label{font-family:var(--mono);font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
-.stat-val{font-size:1.85rem;font-weight:800;margin-top:.2rem}
-.g{color:var(--accent)}.p{color:var(--accent2)}.y{color:var(--warn)}.r{color:var(--danger)}.b{color:var(--info)}
-
-/* Section title */
-.sec{font-size:.6rem;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.12em;margin-bottom:.7rem}
-
-/* Provider grid */
-.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:.85rem;margin-bottom:1.8rem}
-.pcard{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s}
-.pcard.active{border-color:rgba(110,231,183,.18)}
-.pcard.inactive{opacity:.45}
-.pcard-body{padding:1rem 1.1rem .85rem;position:relative}
-.pcard.active .pcard-body::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,var(--accent),var(--accent2))}
-.ph{display:flex;align-items:center;gap:.65rem;margin-bottom:.65rem}
-.picon{font-size:1.15rem;width:34px;height:34px;background:var(--surface2);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.pname{font-weight:700;font-size:.88rem}
-.ppill{margin-left:auto;font-family:var(--mono);font-size:.56rem;padding:.18rem .55rem;border-radius:999px;white-space:nowrap}
-.pill-on{background:rgba(110,231,183,.09);color:var(--accent);border:1px solid rgba(110,231,183,.22)}
-.pill-off{background:rgba(58,58,88,.2);color:var(--muted);border:1px solid var(--border)}
-.pfree{font-family:var(--mono);font-size:.6rem;color:var(--text-dim);margin-bottom:.5rem;line-height:1.5}
-.pnote{font-family:var(--mono);font-size:.58rem;color:var(--muted);margin-bottom:.65rem;line-height:1.4;font-style:italic}
-.pmetrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.35rem}
-.metric{background:var(--surface2);border-radius:7px;padding:.4rem .55rem}
-.ml{font-family:var(--mono);font-size:.53rem;color:var(--muted)}
-.mv{font-family:var(--mono);font-size:.8rem;font-weight:600;margin-top:.1rem}
-/* Slots footer */
-.pfoot{border-top:1px solid var(--border);padding:.55rem 1.1rem;background:rgba(0,0,0,.12);
-  display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;min-height:36px}
-.slot{font-family:var(--mono);font-size:.58rem;padding:.18rem .5rem;border-radius:4px;display:inline-flex;align-items:center;gap:.25rem}
-.slot-ok{background:rgba(110,231,183,.07);color:var(--accent);border:1px solid rgba(110,231,183,.18)}
-.slot-cool{background:rgba(251,191,36,.07);color:var(--warn);border:1px solid rgba(251,191,36,.18)}
-.get-key{font-family:var(--mono);font-size:.58rem;color:var(--accent2);text-decoration:none;margin-left:auto;opacity:.6;transition:opacity .15s}
-.get-key:hover{opacity:1}
-
-/* Test panel */
-.test-panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.8rem}
-.panel-hdr{padding:.7rem 1.1rem;border-bottom:1px solid var(--border);background:var(--surface2);
-  font-weight:700;font-size:.82rem;display:flex;align-items:center;gap:.5rem}
-.test-body{padding:1rem;display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
-@media(max-width:600px){.test-body{grid-template-columns:1fr}}
-label{display:block;font-family:var(--mono);font-size:.58rem;color:var(--muted);margin-bottom:.3rem}
-textarea,input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;
-  color:var(--text);font-family:var(--mono);font-size:.76rem;padding:.6rem .8rem;resize:vertical;outline:none;transition:border-color .2s}
-textarea:focus,input:focus{border-color:var(--accent2)}
-textarea{min-height:88px}
-.field{margin-bottom:.65rem}
-.row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.7rem;align-items:center}
-.btn{padding:.55rem 1.2rem;border-radius:8px;font-family:var(--sans);font-weight:700;font-size:.8rem;cursor:pointer;border:none;transition:opacity .15s,transform .1s}
-.btn:active{transform:scale(.97)}
-.btn-primary{background:linear-gradient(135deg,var(--accent),#34d399);color:#080810}
-.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-dim)}
-.btn:disabled{opacity:.35;cursor:not-allowed}
-.resp{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.85rem;
-  font-family:var(--mono);font-size:.72rem;line-height:1.65;white-space:pre-wrap;color:var(--text-dim);
-  min-height:88px;max-height:260px;overflow-y:auto}
-.resp-meta{font-family:var(--mono);font-size:.58rem;color:var(--muted);margin-top:.4rem}
-.spin{display:inline-block;width:10px;height:10px;border:2px solid rgba(110,231,183,.15);
-  border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:.3rem}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* Log */
-.log-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-.log-hdr{padding:.65rem 1.1rem;border-bottom:1px solid var(--border);background:var(--surface2);
-  display:flex;align-items:center}
-.log-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.67rem}
-.log-table th{text-align:left;padding:.42rem .85rem;color:var(--muted);font-weight:400;font-size:.57rem;
-  text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border)}
-.log-table td{padding:.47rem .85rem;border-bottom:1px solid rgba(29,29,46,.8);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.log-table tr:last-child td{border-bottom:none}
-.log-table tr:hover td{background:var(--surface2)}
-.tag{display:inline-block;padding:.08rem .42rem;border-radius:4px;font-size:.56rem}
-.tok{background:rgba(110,231,183,.08);color:var(--accent)}
-.trl{background:rgba(251,191,36,.08);color:var(--warn)}
-.ter{background:rgba(248,113,113,.08);color:var(--danger)}
-.tau{background:rgba(56,189,248,.08);color:var(--info)}
-/* Modal */
-.modal-overlay{position:fixed;inset:0;background:rgba(8,8,15,.85);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .2s}
-.modal-overlay.open{opacity:1;pointer-events:auto}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:100%;max-width:500px;overflow:hidden;transform:translateY(10px);transition:transform .2s}
-.modal-overlay.open .modal{transform:translateY(0)}
-.modal-hdr{padding:1rem 1.2rem;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between;font-weight:700}
-.modal-close{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1.2rem}
-.modal-body{padding:1.2rem;max-height:60vh;overflow-y:auto}
-.modal-foot{padding:1rem 1.2rem;border-top:1px solid var(--border);background:var(--surface2);display:flex;justify-content:flex-end;gap:.8rem}
+  /* Log Table */
+  .log-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  th { text-align: left; padding: 0.75rem 1.25rem; color: var(--text-muted); font-weight: 500; border-bottom: 1px solid var(--border); }
+  td { padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border); color: var(--text); }
+  tr:last-child td { border-bottom: none; }
+  
+  /* Modals */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+  .modal-overlay.open { opacity: 1; pointer-events: auto; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); width: 100%; max-width: 440px; transform: scale(0.98); transition: transform 0.2s; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+  .modal-overlay.open .modal { transform: scale(1); }
+  .modal-hdr { padding: 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; font-weight: 600; }
+  .modal-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem; }
+  .modal-body { padding: 1.25rem; max-height: 60vh; overflow-y: auto; }
+  .modal-foot { padding: 1.25rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 0.75rem; background: var(--bg); border-bottom-left-radius: var(--radius-lg); border-bottom-right-radius: var(--radius-lg); }
+  
+  /* Tutorial */
+  body.tour-active { overflow: hidden; }
+  .tour-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .tour-overlay.show { opacity: 1; pointer-events: auto; }
+  .tour-highlight { position: relative; z-index: 1000 !important; box-shadow: 0 0 0 4px rgba(255,255,255,0.15) !important; background: var(--surface) !important; border-radius: inherit; }
+  .tour-card { position: absolute; z-index: 1001; background: var(--primary); color: var(--primary-inv); padding: 1.5rem; border-radius: var(--radius-lg); width: 320px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); transition: all 0.3s; opacity: 0; pointer-events: none; }
+  .tour-card.show { opacity: 1; pointer-events: auto; }
+  .tour-title { font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; }
+  .tour-text { font-size: 0.85rem; opacity: 0.85; margin-bottom: 1.5rem; line-height: 1.5; }
+  .tour-foot { display: flex; justify-content: space-between; align-items: center; }
+  .tour-step-info { font-size: 0.75rem; font-weight: 500; opacity: 0.6; }
+  .tour-btn { background: rgba(0,0,0,0.1); border: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-weight: 500; cursor: pointer; font-family: var(--font-sans); }
+  .tour-btn:hover { background: rgba(0,0,0,0.2); }
+  .tour-btn-skip { background: transparent; color: var(--primary-inv); opacity: 0.6; }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap" id="main-wrap">
 
-<header>
-  <div class="logo">⚡</div>
-  <div>
-    <h1>LLM <em>Router</em></h1>
+  <header id="tour-header">
+    <h1>LLM Router <span class="badge">Live</span></h1>
     <div class="subtitle">11 free providers · multi-key pool · round-robin · auto-fallback</div>
+  </header>
+
+  <div class="ep-bar" id="tour-endpoint">
+    <span class="method">POST</span>
+    <span class="url" id="ep-url"></span>
+    <button class="copy-btn" onclick="copyEp()">Copy URL</button>
   </div>
-  <div class="live-pill"><span class="live-dot"></span>LIVE</div>
-</header>
 
-<div class="ep-bar">
-  <span class="method">POST</span>
-  <span class="url" id="ep-url"></span>
-  <button class="copy-btn" onclick="copyEp()">Copy</button>
-</div>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-label">Pool Slots</div><div class="stat-val" id="s-slots">—</div></div>
+    <div class="stat-card"><div class="stat-label">Active Keys</div><div class="stat-val" id="s-active">—</div></div>
+    <div class="stat-card"><div class="stat-label">Total Requests</div><div class="stat-val" id="s-total">—</div></div>
+    <div class="stat-card"><div class="stat-label">Success</div><div class="stat-val" style="color:#a7f3d0" id="s-ok">—</div></div>
+  </div>
 
-<div class="stats-row">
-  <div class="stat"><div class="stat-label">Pool Slots</div><div class="stat-val b" id="s-slots">—</div></div>
-  <div class="stat"><div class="stat-label">Active</div><div class="stat-val g" id="s-active">—</div></div>
-  <div class="stat"><div class="stat-label">Requests</div><div class="stat-val p" id="s-total">—</div></div>
-  <div class="stat"><div class="stat-label">Success</div><div class="stat-val g" id="s-ok">—</div></div>
-  <div class="stat"><div class="stat-label">Rate Ltd</div><div class="stat-val y" id="s-rl">—</div></div>
-  <div class="stat"><div class="stat-label">Errors</div><div class="stat-val r" id="s-err">—</div></div>
-</div>
+  <div class="sec-title">Providers</div>
+  <div class="pgrid" id="pgrid"></div>
 
-<div class="sec">Providers — free tier only</div>
-<div class="pgrid" id="pgrid"></div>
-
-<div class="test-panel">
-  <div class="panel-hdr">🧪 Test</div>
-  <div class="test-body">
-    <div>
-      <div class="field"><label>PROMPT</label>
-        <textarea id="tp">Say hello in three languages.</textarea></div>
-      <div class="field"><label>SYSTEM (optional)</label>
-        <input id="ts" value="You are a helpful assistant."></div>
-      <div class="row">
-        <button class="btn btn-primary" id="tbtn" onclick="runTest()">Send</button>
-        <button class="btn btn-ghost" onclick="resetStats()">Reset Stats</button>
-        <span style="font-family:var(--mono);font-size:.6rem;color:var(--muted);margin-left:auto">max tokens: <input id="tt" type="number" value="256" style="width:64px;display:inline;padding:.2rem .4rem"></span>
+  <div class="sec-title">Playground</div>
+  <div class="test-panel" id="tour-test">
+    <div class="test-body">
+      <div>
+        <div class="field"><label>System Prompt (optional)</label>
+          <input id="ts" value="You are a helpful assistant."></div>
+        <div class="field"><label>User Prompt</label>
+          <textarea id="tp">Say hello in three languages.</textarea></div>
+        <div style="display:flex; gap:0.5rem; align-items:center;">
+          <button class="btn btn-primary" id="tbtn" onclick="runTest()">Send Request</button>
+          <button class="btn btn-secondary" onclick="resetStats()">Reset Stats</button>
+        </div>
+      </div>
+      <div>
+        <div class="field"><label>Response</label>
+          <div class="resp-box" id="resp">// response will appear here</div>
+          <div class="resp-meta" id="resp-meta"></div>
+        </div>
       </div>
     </div>
-    <div>
-      <label>RESPONSE</label>
-      <div class="resp" id="resp">// response will appear here</div>
-      <div class="resp-meta" id="resp-meta"></div>
+  </div>
+
+  <div class="sec-title">Recent Logs</div>
+  <div class="log-wrap">
+    <table>
+      <thead><tr><th>Time</th><th>Provider</th><th>Key</th><th>Model</th><th>Tokens</th><th>Tries</th></tr></thead>
+      <tbody id="log-body"></tbody>
+    </table>
+  </div>
+
+  <footer style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); text-align: center;">
+    <div style="font-weight: 500; color: #fca5a5; margin-bottom: 1rem; font-size: 0.85rem; display:flex; align-items:center; justify-content:center; gap:0.5rem;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      For educational and development purposes only. Not intended for production use.
     </div>
-  </div>
-</div>
-
-<div class="sec">Request Log</div>
-<div class="log-wrap">
-  <div class="log-hdr">
-    <span style="font-family:var(--mono);font-size:.65rem;color:var(--muted)">RECENT</span>
-    <span style="margin-left:auto;font-family:var(--mono);font-size:.6rem;color:var(--muted)" id="log-count"></span>
-  </div>
-  <table class="log-table">
-    <thead><tr><th>Time</th><th>Provider</th><th>Key #</th><th>Model</th><th>Status</th><th>Tokens in+out</th><th>Tries</th></tr></thead>
-    <tbody id="log-body"></tbody>
-  </table>
-</div>
+    <div style="margin-bottom: 1.5rem;">
+      <a href="https://www.chai4.me/jayrajankar" target="_blank" style="display:inline-flex; align-items:center; gap:0.5rem; background: var(--surface2); color: var(--text); padding: 0.5rem 1rem; border-radius: 99px; text-decoration: none; font-size: 0.85rem; font-weight: 500; border: 1px solid var(--border); transition: all 0.2s;">
+        ☕ Support the Developer
+      </a>
+    </div>
+    <div style="font-size: 0.8rem; color: var(--text-muted); display:flex; justify-content:center; gap: 1.5rem;">
+      <a href="#" onclick="openLegal('terms')" style="color: inherit; text-decoration: none;">Terms of Use</a>
+      <a href="#" onclick="openLegal('privacy')" style="color: inherit; text-decoration: none;">Privacy Policy</a>
+      <a href="#" onclick="openLegal('faq')" style="color: inherit; text-decoration: none;">FAQ</a>
+    </div>
+  </footer>
 
 </div>
 
+<!-- Config Modal -->
 <div class="modal-overlay" id="cfg-modal">
   <div class="modal">
     <div class="modal-hdr">
@@ -206,8 +205,36 @@ textarea{min-height:88px}
     </div>
     <div class="modal-body" id="cfg-body"></div>
     <div class="modal-foot">
-      <button class="btn btn-ghost" onclick="closeConfig()">Cancel</button>
+      <button class="btn btn-secondary" onclick="closeConfig()">Cancel</button>
       <button class="btn btn-primary" onclick="saveConfig()">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- Legal Modal -->
+<div class="modal-overlay" id="legal-modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <span id="legal-title">Title</span>
+      <button class="modal-close" onclick="closeLegal()">×</button>
+    </div>
+    <div class="modal-body" id="legal-body" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;"></div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeLegal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tutorial Elements -->
+<div class="tour-overlay" id="tour-overlay"></div>
+<div class="tour-card" id="tour-card">
+  <div class="tour-title" id="tour-title">Welcome</div>
+  <div class="tour-text" id="tour-text">Tour text</div>
+  <div class="tour-foot">
+    <span class="tour-step-info" id="tour-step-info">1 of 4</span>
+    <div>
+      <button class="tour-btn tour-btn-skip" onclick="endTour()">Skip</button>
+      <button class="tour-btn" id="tour-next-btn" onclick="nextTourStep()">Next</button>
     </div>
   </div>
 </div>
@@ -219,18 +246,35 @@ document.getElementById('ep-url').textContent = `${BASE}/v1/chat/completions`;
 function copyEp(){
   navigator.clipboard.writeText(document.getElementById('ep-url').textContent);
   const b=document.querySelector('.copy-btn'); b.textContent='Copied!';
-  setTimeout(()=>b.textContent='Copy',1500);
+  setTimeout(()=>b.textContent='Copy URL',1500);
 }
 
-function stTag(s){
-  const m={success:'tok',rate_limited:'trl',error:'ter',auth_error:'tau'};
-  return `<span class="tag ${m[s]||'ter'}">${s.replace(/_/g,' ')}</span>`;
-}
+const ICONS = {
+  groq: `<svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
+  cerebras: `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>`,
+  openrouter: `<svg viewBox="0 0 24 24"><path d="M16 11.78L20.24 7.5 16 3.22l-1.41 1.41L17.41 7H4v2h13.41l-2.83 2.83L16 11.78zM8 12.22L3.76 16.5 8 20.78l1.41-1.41L6.59 17H20v-2H6.59l2.83-2.83L8 12.22z"/></svg>`,
+  google_ai: `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93z"/></svg>`,
+  nvidia: `<svg viewBox="0 0 24 24"><path d="M2 2h20v20H2z" fill="none" stroke="currentColor" stroke-width="2"/><rect x="6" y="6" width="12" height="12" fill="currentColor"/></svg>`,
+  mistral: `<svg viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 4.5l6.5 13.5h-13L12 6.5z"/></svg>`,
+  codestral: `<svg viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>`,
+  huggingface: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 15s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="2" fill="none"/></svg>`,
+  cohere: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3"/></svg>`,
+  github_models: `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.45-1.15-1.11-1.46-1.11-1.46-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z"/></svg>`,
+  cloudflare: `<svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>`
+};
+const DEF_ICON = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/></svg>`;
+
+const SETTINGS_ICON = `<svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>`;
 
 let providersData = {};
 let currentEnv = {};
 
+let tourActive = false;
+let tourInitialized = false;
+
 async function load(){
+  if (tourActive) return; // Pause live updates while tutorial is running so DOM doesn't rebuild and break highlights
+  
   try{
     const d = await fetch(`${BASE}/api/status`).then(r=>r.json());
     providersData = d.providers;
@@ -243,55 +287,51 @@ async function load(){
     for(const p of Object.values(d.providers)){ok+=p.aggregateStats.success;rl+=p.aggregateStats.rateLimited;er+=p.aggregateStats.failure;}
     document.getElementById('s-total').textContent = ok+rl+er;
     document.getElementById('s-ok').textContent = ok;
-    document.getElementById('s-rl').textContent = rl;
-    document.getElementById('s-err').textContent = er;
 
-    // Provider cards
-    document.getElementById('pgrid').innerHTML = Object.values(d.providers).map(p=>{
+    document.getElementById('pgrid').innerHTML = Object.values(d.providers).map((p, idx)=>{
       const on = p.keyCount > 0;
-      const slots = on
-        ? p.slots.map(s=>`<span class="slot ${s.coolingDown?'slot-cool':'slot-ok'}">${s.coolingDown?'❄':'✓'} #${s.keyIndex}${s.coolingDown?' '+s.cooldownSecsLeft+'s':' '+s.stats.success}</span>`).join('')
-        : `<span style="font-family:var(--mono);font-size:.58rem;color:var(--muted)">no keys — add to .env</span>`;
-      return `<div class="pcard ${on?'active':'inactive'}">
+      const svg = ICONS[p.id] || DEF_ICON;
+      const tourAttr = idx === 0 ? 'id="tour-configure"' : ''; // hook the first provider for tour
+      return `<div class="pcard" ${tourAttr}>
         <div class="pcard-body">
           <div class="ph">
-            <div class="picon">${p.icon}</div>
+            <div class="picon">${svg}</div>
             <div class="pname">${p.name}</div>
-            <span class="ppill ${on?'pill-on':'pill-off'}">${on?p.keyCount+' key'+(p.keyCount>1?'s':''):'NO KEYS'}</span>
-            <button class="btn btn-ghost" style="padding:.2rem .5rem;font-size:.65rem;margin-left:.5rem" onclick="openConfig('${p.id}')">⚙️</button>
+            <span class="pstatus ${on?'status-on':'status-off'}">${on?p.keyCount+' Key'+(p.keyCount>1?'s':''):'No Keys'}</span>
+            <button class="btn-cfg" onclick="openConfig('${p.id}')" title="Configure">${SETTINGS_ICON}</button>
           </div>
-          <div class="pfree">${p.freeInfo}</div>
-          ${p.note?`<div class="pnote">${p.note}</div>`:''}
+          <div class="pinfo">${p.freeInfo}</div>
           <div class="pmetrics">
-            <div class="metric"><div class="ml">Success</div><div class="mv g">${p.aggregateStats.success}</div></div>
-            <div class="metric"><div class="ml">Rate Ltd</div><div class="mv y">${p.aggregateStats.rateLimited}</div></div>
-            <div class="metric"><div class="ml">Errors</div><div class="mv r">${p.aggregateStats.failure}</div></div>
+            <div class="metric"><div class="ml">Success</div><div class="mv" style="color:#a7f3d0">${p.aggregateStats.success}</div></div>
+            <div class="metric"><div class="ml">Rate Ltd</div><div class="mv" style="color:#fde68a">${p.aggregateStats.rateLimited}</div></div>
+            <div class="metric"><div class="ml">Errors</div><div class="mv" style="color:#fca5a5">${p.aggregateStats.failure}</div></div>
           </div>
         </div>
-        <div class="pfoot">${slots}<a class="get-key" href="${p.signupUrl}" target="_blank">Get key →</a></div>
       </div>`;
     }).join('');
 
-    // Log
     const logs = d.requestLog||[];
-    document.getElementById('log-count').textContent = `${logs.length} entries`;
     const tb = document.getElementById('log-body');
-    if(!logs.length){
-      tb.innerHTML='<tr><td colspan="7" class="empty">No requests yet.</td></tr>';
-    } else {
+    if(!logs.length) tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:2rem;">No requests yet.</td></tr>';
+    else {
       tb.innerHTML = logs.map(l=>`<tr>
-        <td style="color:var(--muted)">${new Date(l.ts).toLocaleTimeString()}</td>
+        <td style="color:var(--text-muted)">${new Date(l.ts).toLocaleTimeString()}</td>
         <td>${l.providerName||l.providerId||'—'}</td>
-        <td style="color:var(--text-dim)">#${l.keyIndex||'?'}</td>
-        <td style="color:var(--text-dim)">${(l.model||'—').replace('accounts/fireworks/models/','')}</td>
-        <td>${stTag(l.status)}</td>
-        <td style="color:var(--muted)">${l.prompt_tokens!=null?l.prompt_tokens+' + '+l.completion_tokens:'—'}</td>
-        <td style="color:var(--muted)">${l.attempts||1}</td>
+        <td style="color:var(--text-muted)">#${l.keyIndex||'?'}</td>
+        <td style="color:var(--text-muted);font-family:var(--font-mono)">${(l.model||'—').split('/').pop()}</td>
+        <td style="color:var(--text-muted)">${l.prompt_tokens!=null?l.prompt_tokens+' + '+l.completion_tokens:'—'}</td>
+        <td style="color:var(--text-muted)">${l.attempts||1}</td>
       </tr>`).join('');
+    }
+    
+    if (!tourInitialized) {
+      tourInitialized = true;
+      setTimeout(initTutorial, 500);
     }
   }catch(e){console.error(e);}
 }
 
+// Configuration Modal Logic
 let cfgProviderId = null;
 const ENV_MAP = {
   groq: 'GROQ_API_KEY', cerebras: 'CEREBRAS_API_KEY', openrouter: 'OPENROUTER_API_KEY', google_ai: 'GOOGLE_AI_KEY', nvidia: 'NVIDIA_API_KEY', mistral: 'MISTRAL_API_KEY', codestral: 'CODESTRAL_API_KEY', huggingface: 'HUGGINGFACE_API_KEY', cohere: 'COHERE_API_KEY', github_models: 'GITHUB_TOKEN', cloudflare: 'CF_API_KEY'
@@ -301,21 +341,19 @@ function openConfig(id) {
   cfgProviderId = id;
   const p = providersData[id];
   document.getElementById('cfg-title').textContent = `Configure ${p.name}`;
-  
   const prefix = ENV_MAP[id];
-  
   let isCustom = !p.models.includes(p.defaultModel);
   
   let html = `<div class="field"><label>Default Model</label>
-    <select id="cfg-model-select" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:.76rem;padding:.6rem .8rem;outline:none;margin-bottom:0.4rem;transition:border-color .2s" onchange="document.getElementById('cfg-model-custom-wrap').style.display=this.value==='custom'?'block':'none'">
+    <select id="cfg-model-select" style="margin-bottom:0.5rem" onchange="document.getElementById('cfg-model-custom-wrap').style.display=this.value==='custom'?'block':'none'">
       ${p.models.map(m => `<option value="${m}" ${m===p.defaultModel?'selected':''}>${m}</option>`).join('')}
       <option value="custom" ${isCustom?'selected':''}>Other (Custom Model)...</option>
     </select>
     <div id="cfg-model-custom-wrap" style="display:${isCustom?'block':'none'}">
       <input id="cfg-model-custom" type="text" value="${isCustom ? p.defaultModel : ''}" placeholder="Enter custom model name (e.g. org/model)">
     </div>
-    <div style="font-size:0.6rem;color:var(--muted);margin-top:0.3rem">Original Fallback: ${p.models[0]}</div>
-  </div><hr style="border:0;border-top:1px solid var(--border);margin:1rem 0">`;
+    <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.3rem">Original Fallback: ${p.models[0]}</div>
+  </div><hr style="border:0;border-top:1px solid var(--border);margin:1.5rem 0">`;
   
   if (id === 'cloudflare') {
     html += `<div class="field"><label>Account ID (Main)</label><input id="cfg-cf-acc-1" placeholder="${currentEnv['CF_ACCOUNT_ID'] ? '[Configured]' : 'Enter Account ID'}"></div>`;
@@ -332,9 +370,7 @@ function openConfig(id) {
   document.getElementById('cfg-modal').classList.add('open');
 }
 
-function closeConfig() {
-  document.getElementById('cfg-modal').classList.remove('open');
-}
+function closeConfig() { document.getElementById('cfg-modal').classList.remove('open'); }
 
 async function saveConfig() {
   const id = cfgProviderId;
@@ -352,12 +388,8 @@ async function saveConfig() {
   if (id === 'cloudflare') {
     const acc1 = document.getElementById('cfg-cf-acc-1')?.value.trim();
     const key1 = document.getElementById('cfg-key-1')?.value.trim();
-    const acc2 = document.getElementById('cfg-cf-acc-2')?.value.trim();
-    const key2 = document.getElementById('cfg-key-2')?.value.trim();
     if (acc1) updates['CF_ACCOUNT_ID'] = acc1;
     if (key1) updates['CF_API_KEY'] = key1;
-    if (acc2) updates['CF_ACCOUNT_ID_2'] = acc2;
-    if (key2) updates['CF_API_KEY_2'] = key2;
   } else {
     const k1 = document.getElementById('cfg-key-1')?.value.trim();
     const k2 = document.getElementById('cfg-key-2')?.value.trim();
@@ -369,30 +401,21 @@ async function saveConfig() {
   
   if (Object.keys(updates).length > 0) {
     const btn = document.querySelector('#cfg-modal .btn-primary');
-    const oldText = btn.textContent;
-    btn.textContent = 'Saving...';
-    btn.disabled = true;
-    await fetch(`${BASE}/api/settings`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(updates)
-    });
-    btn.textContent = oldText;
-    btn.disabled = false;
+    btn.textContent = 'Saving...'; btn.disabled = true;
+    await fetch(`${BASE}/api/settings`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(updates) });
+    btn.textContent = 'Save Settings'; btn.disabled = false;
   }
-  closeConfig();
-  load();
+  closeConfig(); load();
 }
 
 async function runTest(){
   const prompt=document.getElementById('tp').value.trim();
   const system=document.getElementById('ts').value.trim();
-  const maxTok=parseInt(document.getElementById('tt').value)||256;
   const box=document.getElementById('resp');
   const meta=document.getElementById('resp-meta');
   const btn=document.getElementById('tbtn');
   if(!prompt) return;
-  btn.disabled=true; btn.innerHTML='<span class="spin"></span>Sending…';
+  btn.disabled=true; btn.textContent='Sending...';
   box.textContent='// waiting…'; meta.textContent='';
   const msgs=[];
   if(system) msgs.push({role:'system',content:system});
@@ -401,17 +424,17 @@ async function runTest(){
   try{
     const res=await fetch(`${BASE}/v1/chat/completions`,{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({messages:msgs,max_tokens:maxTok})
+      body:JSON.stringify({messages:msgs,max_tokens:256})
     });
     const data=await res.json();
     const el=((Date.now()-t0)/1000).toFixed(2);
-    if(data.error){ box.textContent=`ERROR: ${data.error.message||JSON.stringify(data.error)}`; }
-    else{
+    if(data.error) box.textContent=`ERROR: ${data.error.message||JSON.stringify(data.error)}`;
+    else {
       box.textContent=data.choices?.[0]?.message?.content||JSON.stringify(data,null,2);
-      meta.textContent=`slot: ${data._router?.slot||'?'} · attempts: ${data._router?.attempts||1} · ${el}s · tokens: ${data.usage?.prompt_tokens??'?'} + ${data.usage?.completion_tokens??'?'}`;
+      meta.textContent=`slot: ${data._router?.slot||'?'} · attempts: ${data._router?.attempts||1} · ${el}s`;
     }
   }catch(e){box.textContent=`Network error: ${e.message}`;}
-  btn.disabled=false; btn.textContent='Send';
+  btn.disabled=false; btn.textContent='Send Request';
   load();
 }
 
@@ -420,8 +443,141 @@ async function resetStats(){
   load();
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// TUTORIAL LOGIC
+// ─────────────────────────────────────────────────────────────────────────────
+const TOUR_STEPS = [
+  { id: 'tour-header', title: 'Welcome to LLM Router', text: 'Your unified proxy for accessing 11+ free AI providers seamlessly. Let me show you around.' },
+  { id: 'tour-endpoint', title: 'The Universal Endpoint', text: 'Point your AI applications (like Cursor, Cline, or custom scripts) to this URL. We use standard OpenAI formatting!' },
+  { id: 'tour-configure', title: 'Configure Providers', text: 'Click the settings icon on any provider to securely add your API keys and override the default fallback model.' },
+  { id: 'tour-test', title: 'Test it out!', text: 'Once you add a key, use this playground to verify your routing is working correctly. You are all set!' }
+];
+let currentStep = 0;
+
+function initTutorial() {
+  if (localStorage.getItem('tourCompleted') === 'true') return;
+  tourActive = true;
+  document.body.classList.add('tour-active');
+  document.getElementById('tour-overlay').classList.add('show');
+  showTourStep(0);
+}
+
+function showTourStep(index) {
+  if (currentStep > 0 && TOUR_STEPS[currentStep-1].id) {
+    const prevEl = document.getElementById(TOUR_STEPS[currentStep-1].id);
+    if (prevEl) prevEl.classList.remove('tour-highlight');
+  }
+  
+  if (index >= TOUR_STEPS.length) { endTour(); return; }
+  currentStep = index;
+  
+  const step = TOUR_STEPS[index];
+  const el = document.getElementById(step.id);
+  const card = document.getElementById('tour-card');
+  
+  if (el) {
+    el.classList.add('tour-highlight');
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    
+    setTimeout(() => {
+      const rect = el.getBoundingClientRect();
+      // Position card smartly
+      let top = rect.bottom + 20;
+      if (top + 200 > window.innerHeight) top = Math.max(20, rect.top - 220); // place above if no space, but not offscreen
+      
+      card.style.top = `${top + window.scrollY}px`;
+      card.style.left = `${Math.max(20, rect.left + (rect.width/2) - 160) + window.scrollX}px`;
+      
+      document.getElementById('tour-title').textContent = step.title;
+      document.getElementById('tour-text').textContent = step.text;
+      document.getElementById('tour-step-info').textContent = `${index + 1} of ${TOUR_STEPS.length}`;
+      document.getElementById('tour-next-btn').textContent = index === TOUR_STEPS.length - 1 ? 'Finish' : 'Next';
+      
+      card.classList.add('show');
+    }, 300);
+  }
+}
+
+function nextTourStep() {
+  document.getElementById('tour-card').classList.remove('show');
+  setTimeout(() => showTourStep(currentStep + 1), 300);
+}
+
+function endTour() {
+  localStorage.setItem('tourCompleted', 'true');
+  tourActive = false;
+  document.body.classList.remove('tour-active');
+  document.getElementById('tour-overlay').classList.remove('show');
+  document.getElementById('tour-card').classList.remove('show');
+  if (currentStep < TOUR_STEPS.length && TOUR_STEPS[currentStep].id) {
+    const el = document.getElementById(TOUR_STEPS[currentStep].id);
+    if (el) el.classList.remove('tour-highlight');
+  }
+  load(); // resume live updates
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LEGAL LOGIC
+// ─────────────────────────────────────────────────────────────────────────────
+const LEGAL_CONTENT = {
+  terms: {
+    title: "Terms of Use & Liability Waiver",
+    html: `
+      <p style="margin-bottom:1rem">By using LLM Router, you acknowledge and agree to the following terms:</p>
+      <ul style="padding-left:1.5rem; margin-bottom:1rem;">
+        <li style="margin-bottom:0.5rem"><strong>No Warranty:</strong> This software is provided "as is", without warranty of any kind, express or implied.</li>
+        <li style="margin-bottom:0.5rem"><strong>Limitation of Liability:</strong> In no event shall the developer (Jay Rajankar) be liable for any claim, damages, API costs, account bans, or other liability arising from the use of this software.</li>
+        <li style="margin-bottom:0.5rem"><strong>Not for Production:</strong> This tool is strictly intended for local development, research, and educational purposes. It is not designed or secured for production deployment.</li>
+        <li style="margin-bottom:0.5rem"><strong>API Provider Terms:</strong> You are solely responsible for complying with the Terms of Service of any third-party AI providers you connect to this router.</li>
+      </ul>
+    `
+  },
+  privacy: {
+    title: "Privacy Policy",
+    html: `
+      <p style="margin-bottom:1rem">Your privacy and data security are paramount.</p>
+      <ul style="padding-left:1.5rem; margin-bottom:1rem;">
+        <li style="margin-bottom:0.5rem"><strong>Local Execution:</strong> LLM Router runs entirely locally on your machine.</li>
+        <li style="margin-bottom:0.5rem"><strong>No Data Collection:</strong> No prompts, conversations, IP addresses, or API keys are ever transmitted to the developer.</li>
+        <li style="margin-bottom:0.5rem"><strong>Direct Routing:</strong> Your requests are proxied directly from your local machine to the official APIs of the AI providers you configure.</li>
+        <li style="margin-bottom:0.5rem"><strong>Key Storage:</strong> API keys are saved securely in a local <code>.env</code> file within the application directory.</li>
+      </ul>
+    `
+  },
+  faq: {
+    title: "Frequently Asked Questions",
+    html: `
+      <div style="margin-bottom:1rem">
+        <div style="font-weight:600; color:var(--text); margin-bottom:0.25rem">Is this completely free?</div>
+        <div>The router itself is 100% free. However, your usage is subject to the free-tier limits imposed by the respective AI providers (e.g., Groq, OpenRouter).</div>
+      </div>
+      <div style="margin-bottom:1rem">
+        <div style="font-weight:600; color:var(--text); margin-bottom:0.25rem">Can I use this in my production app?</div>
+        <div>No. This router lacks production-grade authentication, rate limiting, and database-backed logging. It is built strictly for local developer workflows.</div>
+      </div>
+      <div style="margin-bottom:1rem">
+        <div style="font-weight:600; color:var(--text); margin-bottom:0.25rem">How does fallback routing work?</div>
+        <div>If a provider goes down or you hit a rate limit, the router will automatically cycle to the next available provider in your active pool to fulfill your prompt seamlessly.</div>
+      </div>
+      <div style="margin-bottom:1rem">
+        <div style="font-weight:600; color:var(--text); margin-bottom:0.25rem">Are my API keys secure?</div>
+        <div>Yes. Keys are stored entirely locally on your hard drive and are only transmitted directly to the official provider endpoints during inference.</div>
+      </div>
+    `
+  }
+};
+
+function openLegal(key) {
+  const data = LEGAL_CONTENT[key];
+  document.getElementById('legal-title').textContent = data.title;
+  document.getElementById('legal-body').innerHTML = data.html;
+  document.getElementById('legal-modal').classList.add('open');
+}
+
+function closeLegal() { document.getElementById('legal-modal').classList.remove('open'); }
+
 load();
-setInterval(load,5000);
+setInterval(load, 5000);
 </script>
 </body>
 </html>

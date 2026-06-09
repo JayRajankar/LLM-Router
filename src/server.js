@@ -499,7 +499,7 @@ app.get('/api/settings', (req, res) => {
 
 app.post('/api/settings', (req, res) => {
   const updates = req.body;
-  const envPath = path.join(__dirname, '..', '.env');
+  const envPath = path.join(process.cwd(), '.env');
   let envContent = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
   
   for (const [k, v] of Object.entries(updates)) {

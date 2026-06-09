@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Loading LLM Router...</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0c0c0d;
+      --text: #ededed;
+      --text-muted: #888888;
+      --primary: #ffffff;
+    }
+    body {
+      margin: 0; padding: 0; background-color: var(--bg); color: var(--text);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100vh; font-family: 'Inter', sans-serif;
+    }
+    .spinner {
+      width: 32px; height: 32px; border: 2px solid rgba(255,255,255,0.1);
+      border-top-color: var(--primary); border-radius: 50%;
+      animation: spin 0.8s ease-in-out infinite; margin-bottom: 24px;
+    }
+    .status {
+      font-size: 14px; font-weight: 500; letter-spacing: -0.01em; color: var(--text-muted);
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="spinner"></div>
+  <div class="status" id="status">Waking up local backend...</div>
+  <script>
+    async function checkServer() {
+      try {
+        const res = await fetch('http://127.0.0.1:3000/api/status');
+        if (res.ok) {
+          window.location.href = 'http://127.0.0.1:3000';
+          return;
+        }
+      } catch (e) {
+        // Not ready yet
+      }
+      setTimeout(checkServer, 500);
+    }
+    checkServer();
+  </script>
+</body>
+</html>

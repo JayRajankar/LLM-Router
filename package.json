@@ -11,7 +11,9 @@
   },
   "pkg": {
     "assets": [
-      "src/index.html"
+      "src/index.html",
+      "src/terms.html",
+      "src/privacy.html"
     ]
   },
   "keywords": ["llm", "ai", "router", "proxy", "groq", "openrouter", "cerebras", "free"],

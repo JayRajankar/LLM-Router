@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Use - LLM Router</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Syne:wght@400;600;700;800&display=swap');
+:root{
+  --bg:#08080f;--surface:#0f0f1a;--surface2:#161625;--border:#1d1d2e;
+  --accent:#6ee7b7;--accent2:#818cf8;--warn:#fbbf24;--danger:#f87171;--info:#38bdf8;
+  --muted:#3a3a58;--text:#e2e8f0;--text-dim:#64748b;
+  --mono:'JetBrains Mono',monospace;--sans:'Syne',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;line-height:1.6}
+body::before{content:'';position:fixed;inset:0;
+  background-image:linear-gradient(rgba(110,231,183,.02) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(110,231,183,.02) 1px,transparent 1px);
+  background-size:48px 48px;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:4rem 1.5rem}
+
+h1{font-size:2.2rem;font-weight:800;letter-spacing:-.03em;margin-bottom:0.5rem;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+h2{font-size:1.4rem;font-weight:700;margin-top:2.5rem;margin-bottom:1rem;color:var(--text)}
+p, li{color:var(--text-dim);font-size:1rem;margin-bottom:1rem}
+ul{margin-left:1.5rem;margin-bottom:1rem}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.back-link{display:inline-flex;align-items:center;gap:.5rem;color:var(--text-dim);font-family:var(--mono);font-size:.85rem;margin-bottom:2rem;text-decoration:none;transition:color .2s}
+.back-link:hover{color:var(--accent)}
+.content-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:2rem 2.5rem;margin-top:2rem}
+.last-updated{font-family:var(--mono);font-size:.8rem;color:var(--muted);margin-bottom:2rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/" class="back-link">← Back to Dashboard</a>
+  <h1>Terms of Use</h1>
+  <div class="last-updated">Last Updated: June 2026</div>
+
+  <div class="content-box">
+    <h2>1. Acceptance of Terms</h2>
+    <p>By accessing and using LLM Router, you agree to be bound by these Terms of Use. If you do not agree to these terms, please do not use the software.</p>
+
+    <h2>2. Description of Service</h2>
+    <p>LLM Router is an open-source, self-hosted proxy application that routes requests to various third-party Large Language Model (LLM) APIs. The software provides load balancing, fallback routing, and dashboard analytics for these APIs.</p>
+
+    <h2>3. Third-Party Terms</h2>
+    <p>LLM Router interacts with numerous third-party providers (such as Groq, Cerebras, OpenRouter, Google AI Studio, NVIDIA NIM, Mistral, HuggingFace, Cohere, GitHub Models, and Cloudflare). By using LLM Router, you must comply with the Terms of Service and Acceptable Use Policies of the specific API providers you have configured.</p>
+    <p>We are not responsible for any account bans, suspensions, or rate limits imposed by these third-party providers due to your usage.</p>
+
+    <h2>4. Acceptable Use</h2>
+    <p>You agree not to use LLM Router to:</p>
+    <ul>
+      <li>Violate any applicable local, state, national, or international laws.</li>
+      <li>Bypass or attempt to circumvent the security, rate-limiting, or billing mechanisms of third-party API providers in a way that violates their respective terms.</li>
+      <li>Transmit any material that is abusive, harassing, tortious, defamatory, vulgar, pornographic, obscene, libelous, invasive of another's privacy, or otherwise objectionable, insofar as restricted by upstream providers.</li>
+    </ul>
+
+    <h2>5. Disclaimer of Warranties</h2>
+    <p>The software is provided on an "AS IS" and "AS AVAILABLE" basis. We make no representations or warranties of any kind, express or implied, regarding the operation of the software, the accuracy or reliability of its outputs, or the availability of third-party APIs.</p>
+
+    <h2>6. Limitation of Liability</h2>
+    <p>In no event shall the developers or contributors of LLM Router be liable for any direct, indirect, incidental, special, or consequential damages arising out of or in any way connected with the use of the software.</p>
+
+    <h2>7. Changes to Terms</h2>
+    <p>We reserve the right to modify these Terms of Use at any time. Your continued use of the software following any changes indicates your acceptance of the new terms.</p>
+  </div>
+</div>
+</body>
+</html>

@@ -21,6 +21,9 @@
   },
   "bundle": {
     "active": true,
+    "publisher": "Jay Rajankar",
+    "shortDescription": "A high-performance proxy router across 11 permanently free LLM APIs.",
+    "copyright": "Copyright © Jay Rajankar",
     "externalBin": [
       "binaries/llm-router"
     ],

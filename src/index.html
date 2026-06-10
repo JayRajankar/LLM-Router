@@ -805,11 +805,18 @@ function openLegal(key) {
 async function openExternal(url) {
   if (window.__TAURI__) {
     try {
-      if (window.__TAURI__.opener) await window.__TAURI__.opener.open(url);
-      else if (window.__TAURI__.shell) await window.__TAURI__.shell.open(url);
-      else if (window.__TAURI__.core) await window.__TAURI__.core.invoke('plugin:opener|open', { path: url });
-      else throw new Error('No opener plugin found');
-    } catch(e) { window.open(url, '_blank'); }
+      if (window.__TAURI__.opener) { await window.__TAURI__.opener.open(url); return; }
+      if (window.__TAURI__.shell) { await window.__TAURI__.shell.open(url); return; }
+      
+      try { await window.__TAURI__.core.invoke('plugin:opener|open', { path: url }); return; } catch(e){}
+      try { await window.__TAURI__.core.invoke('plugin:opener|open_url', { url: url }); return; } catch(e){}
+      try { await window.__TAURI__.core.invoke('plugin:shell|open', { path: url }); return; } catch(e){}
+      
+      throw new Error('No opener plugin found');
+    } catch(e) { 
+      // If Tauri fails to open it natively, fallback to window.open
+      window.open(url, '_blank'); 
+    }
   } else {
     window.open(url, '_blank');
   }

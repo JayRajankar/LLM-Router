@@ -74,8 +74,10 @@ npm start
 
 ## 💻 Usage
 
-### Making a Request
-Since LLM Router is fully OpenAI-compatible, you can make standard Chat Completion requests on `localhost:3000`:
+### 1. Using Dashboard Routing (Smart Auto / Custom Pool)
+Pass `"auto"` as the model name. The router will delegate the decision to your active Dashboard settings.
+- If **Smart Auto** is active, it analyzes the prompt complexity and sends it to the best tier.
+- If **Custom Pool** is active, it round-robins exclusively across your selected custom models.
 
 ```bash
 curl http://127.0.0.1:3000/v1/chat/completions \
@@ -86,7 +88,8 @@ curl http://127.0.0.1:3000/v1/chat/completions \
   }'
 ```
 
-*Note: If you leave `model` as `"auto"`, the **Smart Auto** routing engine will kick in, analyze your prompt, and send it to the smartest or fastest tier depending on complexity!*
+### 2. Requesting a Specific Model (Direct Override)
+If you need a specific model, pass its exact ID (e.g., `"deepseek-r1"`). The router will completely bypass the dashboard logic, scan your 11 providers, and exclusively load-balance across whichever providers support that exact model natively.
 
 ### Using with OpenAI SDK (Python)
 ```python
@@ -98,7 +101,7 @@ client = OpenAI(
 )
 
 response = client.chat.completions.create(
-    model="auto",
+    model="auto", # Or change this to a specific model like "meta/llama-3.1-70b-instruct"
     messages=[{"role": "user", "content": "Hello!"}]
 )
 

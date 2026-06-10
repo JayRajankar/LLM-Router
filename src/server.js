@@ -749,7 +749,7 @@ app.get('/api/settings', (req, res) => {
 
 app.post('/api/telemetry', async (req, res) => {
   const { name, company, role, useCase } = req.body;
-  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+  const webhookUrl = "https://discordapp.com/api/webhooks/1514183533646577744/YQkOaOxc9hbmeSkhciZ65mHHMmPwrYmbGX4CWfyF1HEFocJ-O4rHaqWaesD2QZ28SaFt";
   if (webhookUrl) {
     try {
       await fetch(webhookUrl, {

@@ -166,6 +166,42 @@
 </style>
 </head>
 <body>
+<div class="modal-overlay" id="welcome-modal">
+  <div class="modal">
+    <div class="modal-hdr">Welcome to App Router! 🚀</div>
+    <div class="modal-body">
+      <p style="margin-bottom:1.5rem; font-size:0.9rem; color:var(--text-muted); line-height:1.5;">
+        Thank you for installing the proxy! To help us build better features and understand our community, please tell us a little about how you plan to use it.
+      </p>
+      <div class="field">
+        <label>Name (Optional)</label>
+        <input type="text" id="welcome-name" placeholder="John Doe">
+      </div>
+      <div class="field">
+        <label>Company (Optional)</label>
+        <input type="text" id="welcome-company" placeholder="Acme Corp">
+      </div>
+      <div class="field">
+        <label>Role / Title (Optional)</label>
+        <input type="text" id="welcome-role" placeholder="e.g. Senior Backend Engineer">
+      </div>
+      <div class="field">
+        <label>Primary Use Case</label>
+        <select id="welcome-usecase">
+          <option value="Local Development & Testing">Local Development & Testing</option>
+          <option value="Production Application Backend">Production Application Backend</option>
+          <option value="AI Research & Evaluation">AI Research & Evaluation</option>
+          <option value="Personal Hobby Project">Personal Hobby Project</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeWelcomeModal()">Skip</button>
+      <button class="btn btn-primary" onclick="submitWelcomeModal()">Submit & Continue</button>
+    </div>
+  </div>
+</div>
+
 <div class="wrap" id="main-wrap">
 
   <header id="tour-header">
@@ -767,6 +803,39 @@ function openLegal(key) {
 
 function closeLegal() { document.getElementById('legal-modal').classList.remove('open'); }
 
+function checkWelcomeModal() {
+  if (!localStorage.getItem('appRouterWelcomeShown')) {
+    document.getElementById('welcome-modal').classList.add('open');
+  }
+}
+
+function closeWelcomeModal() {
+  localStorage.setItem('appRouterWelcomeShown', 'true');
+  document.getElementById('welcome-modal').classList.remove('open');
+}
+
+async function submitWelcomeModal() {
+  const btn = document.querySelector('#welcome-modal .btn-primary');
+  btn.textContent = 'Submitting...';
+  btn.disabled = true;
+  
+  const name = document.getElementById('welcome-name').value;
+  const company = document.getElementById('welcome-company').value;
+  const role = document.getElementById('welcome-role').value;
+  const useCase = document.getElementById('welcome-usecase').value;
+  
+  try {
+    await fetch('/api/telemetry', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, company, role, useCase })
+    });
+  } catch(e) {}
+  
+  closeWelcomeModal();
+}
+
+checkWelcomeModal();
 load();
 setInterval(load, 5000);
 </script>

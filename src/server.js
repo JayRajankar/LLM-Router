@@ -747,6 +747,35 @@ app.get('/api/settings', (req, res) => {
   res.json({ env: envMap });
 });
 
+app.post('/api/telemetry', async (req, res) => {
+  const { name, company, role, useCase } = req.body;
+  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+  if (webhookUrl) {
+    try {
+      await fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: "🚀 **New App Router Registration!**",
+          embeds: [{
+            color: 6513361, // #6366f1
+            fields: [
+              { name: "Name", value: name || "Anonymous", inline: true },
+              { name: "Company", value: company || "N/A", inline: true },
+              { name: "Role", value: role || "N/A", inline: true },
+              { name: "Primary Use Case", value: useCase || "Not specified", inline: false }
+            ],
+            timestamp: new Date().toISOString()
+          }]
+        })
+      });
+    } catch (err) {
+      console.error('Failed to send telemetry to Discord:', err);
+    }
+  }
+  res.json({ ok: true });
+});
+
 app.post('/api/settings', (req, res) => {
   const updates = req.body;
   const envPath = path.join(process.cwd(), '.env');

@@ -309,7 +309,7 @@
       For educational and development purposes only. Not intended for production use.
     </div>
     <div style="margin-bottom: 1.5rem;">
-      <a href="https://www.chai4.me/jayrajankar" target="_blank" style="display:inline-flex; align-items:center; gap:0.5rem; background: var(--surface2); color: var(--text); padding: 0.5rem 1rem; border-radius: 99px; text-decoration: none; font-size: 0.85rem; font-weight: 500; border: 1px solid var(--border); transition: all 0.2s;">
+      <a href="javascript:void(0)" onclick="openExternal('https://www.chai4.me/jayrajankar')" style="display:inline-flex; align-items:center; gap:0.5rem; background: var(--surface2); color: var(--text); padding: 0.5rem 1rem; border-radius: 99px; text-decoration: none; font-size: 0.85rem; font-weight: 500; border: 1px solid var(--border); transition: all 0.2s;">
         ☕ Support the Developer
       </a>
     </div>
@@ -765,6 +765,7 @@ const LEGAL_CONTENT = {
       <p style="margin-bottom:1rem">Your privacy and data security are paramount.</p>
       <ul style="padding-left:1.5rem; margin-bottom:1rem;">
         <li style="margin-bottom:0.5rem"><strong>Local Execution:</strong> LLM Router runs entirely locally on your machine.</li>
+        <li style="margin-bottom:0.5rem"><strong>Opt-In Telemetry:</strong> If you voluntarily complete the Welcome onboarding form, the professional details you provide (Name, Company, Role, Use Case) will be transmitted securely to the developer via Discord Webhook. You may skip this completely.</li>
         <li style="margin-bottom:0.5rem"><strong>No Data Collection:</strong> No prompts, conversations, IP addresses, or API keys are ever transmitted to the developer.</li>
         <li style="margin-bottom:0.5rem"><strong>Direct Routing:</strong> Your requests are proxied directly from your local machine to the official APIs of the AI providers you configure.</li>
         <li style="margin-bottom:0.5rem"><strong>Key Storage:</strong> API keys are saved securely in a local <code>.env</code> file within the application directory.</li>
@@ -799,6 +800,19 @@ function openLegal(key) {
   document.getElementById('legal-title').textContent = data.title;
   document.getElementById('legal-body').innerHTML = data.html;
   document.getElementById('legal-modal').classList.add('open');
+}
+
+async function openExternal(url) {
+  if (window.__TAURI__) {
+    try {
+      if (window.__TAURI__.opener) await window.__TAURI__.opener.open(url);
+      else if (window.__TAURI__.shell) await window.__TAURI__.shell.open(url);
+      else if (window.__TAURI__.core) await window.__TAURI__.core.invoke('plugin:opener|open', { path: url });
+      else throw new Error('No opener plugin found');
+    } catch(e) { window.open(url, '_blank'); }
+  } else {
+    window.open(url, '_blank');
+  }
 }
 
 function closeLegal() { document.getElementById('legal-modal').classList.remove('open'); }

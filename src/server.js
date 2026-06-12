@@ -769,7 +769,8 @@ app.get('/api/status', (req, res) => {
     activeSlots: KEY_POOL.filter(s => !(cooldowns[s.slotId] > now)).length,
     providers,
     requestLog: state.requestLog.slice(0, 100),
-    auth: state.auth
+    auth: state.auth,
+    modelTiers: MODEL_TIERS
   });
 });
 

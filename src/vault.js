@@ -21,7 +21,7 @@ function initVault() {
       let changed = false;
 
       lines.forEach(line => {
-        const match = line.match(/^([A-Z0-9_]+_KEY|[A-Z0-9_]+_TOKEN)=(.*)$/);
+        const match = line.match(/^([A-Z0-9_]+(?:_KEY|_TOKEN)(?:_\d+)?)=(.*)$/);
         if (match) {
           envKeys[match[1]] = match[2].trim();
           changed = true;

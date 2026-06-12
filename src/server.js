@@ -815,7 +815,7 @@ app.post('/api/settings', (req, res) => {
   
   const keyUpdates = {};
   for (const [k, v] of Object.entries(updates)) {
-    if (k.endsWith('_KEY') || k.endsWith('_TOKEN')) {
+    if (k.match(/(_KEY|_TOKEN)(_\d+)?$/)) {
       keyUpdates[k] = v;
       continue;
     }

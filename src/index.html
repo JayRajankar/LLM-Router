@@ -918,8 +918,6 @@ async function submitWelcomeModal() {
   closeWelcomeModal();
 }
 
-}
-
 async function checkVaultStatus() {
   try {
     const res = await fetch(`${BASE}/api/vault/status`).then(r => r.json());

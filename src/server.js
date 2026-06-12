@@ -473,6 +473,10 @@ let state = {
   providerStats: Object.fromEntries(
     Object.keys(PROVIDER_DEFS).map(id => [id, { success: 0, failure: 0, rateLimited: 0 }])
   ),
+  auth: {
+    enabled: false,
+    applications: []
+  }
 };
 
 const DATA_FILE = path.join(process.cwd(), 'router_data.json');
@@ -486,6 +490,9 @@ function loadState() {
         state.requestLog = data.state.requestLog || [];
         if (data.state.providerStats) {
           Object.assign(state.providerStats, data.state.providerStats);
+        }
+        if (data.state.auth) {
+          state.auth = data.state.auth;
         }
       }
       if (data.slotStats) {
@@ -605,7 +612,26 @@ app.post('/v1/chat/completions', async (req, res) => {
     });
   }
 
-  const { messages, model, max_tokens, temperature } = req.body;
+  let { messages, model, max_tokens, temperature } = req.body;
+
+  let activeApp = null;
+  if (state.auth.enabled) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: { message: 'Authentication required. Please provide a Bearer token.' } });
+    }
+    const token = authHeader.split(' ')[1];
+    const hash = crypto.createHash('sha256').update(token).digest('hex');
+    activeApp = state.auth.applications.find(a => a.keyHash === hash);
+    if (!activeApp) {
+      return res.status(401).json({ error: { message: 'Invalid API key.' } });
+    }
+    
+    // Apply App Overrides
+    if (activeApp.modelOverride) {
+      model = activeApp.modelOverride;
+    }
+  }
 
   if (!messages || !Array.isArray(messages))
     return res.status(400).json({ error: { message: 'messages array is required' } });
@@ -616,7 +642,10 @@ app.post('/v1/chat/completions', async (req, res) => {
   const triedSlots  = [];
   const maxAttempts = Math.min(KEY_POOL.length, 30);
 
-  const routingMode = process.env.ROUTING_MODE || 'smart';
+  let routingMode = process.env.ROUTING_MODE || 'smart';
+  if (activeApp && activeApp.routingMode !== 'inherit') {
+    routingMode = activeApp.routingMode === 'smart_auto' ? 'smart' : 'custom';
+  }
   const customModels = (process.env.CUSTOM_POOL_MODELS || '').split(',').map(m => m.trim()).filter(Boolean);
 
   let targetTier = null;
@@ -670,6 +699,11 @@ app.post('/v1/chat/completions', async (req, res) => {
       state.requestLog.unshift(log);
       if (state.requestLog.length > 500) state.requestLog.pop();
 
+      if (activeApp) {
+        activeApp.stats.requests++;
+        activeApp.lastUsedAt = Date.now();
+      }
+
       return res.json({ ...result, _router: { slot: slot.slotId, attempts: attempt + 1 } });
 
     } catch (err) {
@@ -697,7 +731,11 @@ app.post('/v1/chat/completions', async (req, res) => {
     }
   }
 
-  res.status(503).json({
+  if (activeApp) {
+    activeApp.stats.failures++;
+    activeApp.lastUsedAt = Date.now();
+  }
+  res.status(502).json({
     error: { message: `All ${triedSlots.length} slot(s) tried — all rate-limited or failed.`, tried: triedSlots },
   });
 });
@@ -727,6 +765,7 @@ app.get('/api/status', (req, res) => {
     activeSlots: KEY_POOL.filter(s => !(cooldowns[s.slotId] > now)).length,
     providers,
     requestLog: state.requestLog.slice(0, 100),
+    auth: state.auth
   });
 });
 
@@ -805,6 +844,51 @@ app.post('/api/vault/set-password', (req, res) => {
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
+});
+
+// Auth Application Endpoints
+const crypto = require('crypto');
+
+app.post('/api/apps/generate', (req, res) => {
+  if (vault.isLocked()) return res.status(401).json({ error: 'Vault is locked' });
+  const { name, routingMode, modelOverride } = req.body;
+  if (!name) return res.status(400).json({ error: 'App name required' });
+
+  const rawKey = 'llmr_sk_' + crypto.randomBytes(24).toString('hex');
+  const keyHash = crypto.createHash('sha256').update(rawKey).digest('hex');
+  const keySuffix = rawKey.slice(-4);
+  const id = 'app_' + crypto.randomBytes(8).toString('hex');
+
+  const appProfile = {
+    id, name, keyHash, keySuffix,
+    routingMode: routingMode || 'inherit',
+    modelOverride: modelOverride || '',
+    stats: { requests: 0, failures: 0 },
+    createdAt: Date.now(),
+    lastUsedAt: null
+  };
+
+  state.auth.applications.push(appProfile);
+  saveState();
+
+  // Return the raw key ONLY once.
+  res.json({ ok: true, rawKey, appProfile });
+});
+
+app.delete('/api/apps/:id', (req, res) => {
+  if (vault.isLocked()) return res.status(401).json({ error: 'Vault is locked' });
+  state.auth.applications = state.auth.applications.filter(a => a.id !== req.params.id);
+  saveState();
+  res.json({ ok: true });
+});
+
+app.post('/api/apps/settings', (req, res) => {
+  if (vault.isLocked()) return res.status(401).json({ error: 'Vault is locked' });
+  if (typeof req.body.enabled === 'boolean') {
+    state.auth.enabled = req.body.enabled;
+    saveState();
+  }
+  res.json({ ok: true });
 });
 
 app.post('/api/settings', (req, res) => {

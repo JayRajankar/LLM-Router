@@ -232,6 +232,7 @@
     <button class="tab-btn active" onclick="switchTab('dashboard')" id="tab-btn-dashboard">Dashboard</button>
     <button class="tab-btn" onclick="switchTab('providers')" id="tab-btn-providers">Providers</button>
     <button class="tab-btn" onclick="switchTab('routing')" id="tab-btn-routing">Routing Strategies</button>
+    <button class="tab-btn" onclick="switchTab('apps')" id="tab-btn-apps">Apps 🔑</button>
     <button class="tab-btn" onclick="switchTab('security')" id="tab-btn-security">Security 🔒</button>
   </div>
 
@@ -346,6 +347,27 @@
     </div>
   </div> <!-- End Tab Security -->
 
+  <div id="tab-apps" class="tab-content">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+      <div class="sec-title" style="margin:0;">Multi-Tenant Application API Keys</div>
+      <div style="display:flex; align-items:center; gap:0.5rem; background:var(--surface); padding:0.5rem 1rem; border-radius:6px; border:1px solid var(--border);">
+        <label style="font-size:0.85rem; font-weight:600; color:var(--text); cursor:pointer;" for="auth-toggle">Require Authentication:</label>
+        <input type="checkbox" id="auth-toggle" onchange="toggleAuth(this.checked)" style="width:16px; height:16px; cursor:pointer;">
+      </div>
+    </div>
+
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem; margin-bottom:1.5rem;">
+      <div style="margin-bottom:1rem; color:var(--text-muted); font-size:0.9rem;">
+        Generate custom <code>llmr_sk_...</code> API keys for your applications (VSCode, Chatbots, Scripts). You can securely lock each application to specific routing strategies or even force them to use a specific model.
+      </div>
+      <button class="btn btn-primary" onclick="openAppModal()">+ Create Application Key</button>
+    </div>
+
+    <div id="apps-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:1rem;">
+      <!-- Populated via JS -->
+    </div>
+  </div> <!-- End Tab Apps -->
+
   <footer style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); text-align: center;">
     <div style="font-weight: 500; color: #fca5a5; margin-bottom: 1rem; font-size: 0.85rem; display:flex; align-items:center; justify-content:center; gap:0.5rem;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -381,6 +403,49 @@
     <div class="modal-foot">
       <button class="btn btn-secondary" onclick="closeConfig()">Cancel</button>
       <button class="btn btn-primary" onclick="saveConfig()">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create App Modal -->
+<div class="modal-overlay" id="app-modal">
+  <div class="modal" style="max-width:450px;">
+    <div class="modal-hdr">
+      <span>Create Application Key</span>
+      <button class="modal-close" onclick="document.getElementById('app-modal').classList.remove('open')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="config-group">
+        <label class="config-label">Application Name</label>
+        <input type="text" id="app-name-input" class="provider-input" placeholder="e.g. Cursor IDE, AutoGPT" style="width:100%;">
+      </div>
+      
+      <div class="config-group">
+        <label class="config-label">Routing Override (Optional)</label>
+        <select id="app-routing-input" class="provider-input" style="width:100%;">
+          <option value="inherit">Inherit Global Strategy (Default)</option>
+          <option value="smart_auto">Force Smart Auto</option>
+          <option value="custom_pool">Force Custom Pool</option>
+        </select>
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.3rem;">If set, forces this routing mode for all requests from this key.</div>
+      </div>
+
+      <div class="config-group">
+        <label class="config-label">Force Model (Optional)</label>
+        <input type="text" id="app-model-input" class="provider-input" placeholder="e.g. llama-3.1-8b" style="width:100%;">
+        <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.3rem;">If set, intercepts whatever model the app requests and safely reroutes it to this exact model. Leave blank to allow app to choose.</div>
+      </div>
+
+      <div id="app-gen-result" style="display:none; margin-bottom:1rem; padding:1rem; background:rgba(16, 185, 129, 0.1); border:1px solid #10b981; border-radius:6px;">
+        <div style="font-weight:600; color:#10b981; margin-bottom:0.5rem; font-size:0.9rem;">✅ Key Generated Successfully</div>
+        <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.5rem;">Copy this now. You won't be able to see it again!</div>
+        <div style="display:flex; gap:0.5rem;">
+          <input type="text" id="app-raw-key" class="provider-input" style="flex:1; font-family:monospace; background:var(--bg);" readonly>
+          <button class="btn btn-secondary" onclick="navigator.clipboard.writeText(document.getElementById('app-raw-key').value)">Copy</button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="app-gen-btn" style="width:100%;" onclick="generateAppKey()">Generate Key</button>
     </div>
   </div>
 </div>
@@ -539,6 +604,8 @@ async function load(){
 
     const d = await fetch(`${BASE}/api/status`).then(r=>r.json());
     providersData = d.providers;
+    if (d.auth) renderApps(d.auth);
+    
     const s = await fetch(`${BASE}/api/settings`).then(r=>r.json());
     currentEnv = s.env || {};
 
@@ -989,6 +1056,119 @@ async function setMasterPassword() {
     msg.textContent = 'Connection error';
     msg.style.color = '#ef4444';
   }
+}
+
+// ── APPS LOGIC ─────────────────────────────────────────────────────────────
+
+async function toggleAuth(enabled) {
+  try {
+    await fetch(`${BASE}/api/apps/settings`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled })
+    });
+    load();
+  } catch(e) {}
+}
+
+function openAppModal() {
+  document.getElementById('app-name-input').value = '';
+  document.getElementById('app-routing-input').value = 'inherit';
+  document.getElementById('app-model-input').value = '';
+  document.getElementById('app-gen-result').style.display = 'none';
+  document.getElementById('app-gen-btn').style.display = 'block';
+  document.getElementById('app-modal').classList.add('open');
+}
+
+async function generateAppKey() {
+  const name = document.getElementById('app-name-input').value.trim();
+  const routingMode = document.getElementById('app-routing-input').value;
+  const modelOverride = document.getElementById('app-model-input').value.trim();
+  if (!name) return alert('Name is required');
+
+  const btn = document.getElementById('app-gen-btn');
+  btn.textContent = 'Generating...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(`${BASE}/api/apps/generate`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, routingMode, modelOverride })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      document.getElementById('app-gen-btn').style.display = 'none';
+      document.getElementById('app-raw-key').value = data.rawKey;
+      document.getElementById('app-gen-result').style.display = 'block';
+      load();
+    } else {
+      alert(data.error);
+    }
+  } catch(e) {
+    alert('Failed to generate key');
+  } finally {
+    btn.textContent = 'Generate Key';
+    btn.disabled = false;
+  }
+}
+
+async function deleteApp(id) {
+  if (!confirm('Are you sure you want to revoke this API key? This will immediately break any application using it.')) return;
+  try {
+    await fetch(`${BASE}/api/apps/${id}`, { method: 'DELETE' });
+    load();
+  } catch(e) {}
+}
+
+function renderApps(auth) {
+  document.getElementById('auth-toggle').checked = auth.enabled;
+  const grid = document.getElementById('apps-grid');
+  grid.innerHTML = '';
+  
+  if (!auth.applications || auth.applications.length === 0) {
+    grid.innerHTML = `<div style="grid-column: 1/-1; padding: 2rem; text-align: center; color: var(--text-muted); background: var(--surface); border-radius: var(--radius-lg); border: 1px dashed var(--border);">No applications created yet. Generate a key to get started.</div>`;
+    return;
+  }
+
+  auth.applications.forEach(app => {
+    let modeText = 'Inherits Global';
+    if (app.routingMode === 'smart_auto') modeText = '🧠 Smart Auto';
+    if (app.routingMode === 'custom_pool') modeText = '⚙️ Custom Pool';
+
+    grid.innerHTML += `
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem; display:flex; flex-direction:column; gap:1rem;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <div style="font-weight:600; font-size:1.1rem; color:var(--primary); margin-bottom:0.25rem;">${app.name}</div>
+            <div style="font-family:monospace; font-size:0.85rem; color:var(--text-muted); background:var(--bg); padding:0.2rem 0.5rem; border-radius:4px; border:1px solid var(--border); display:inline-block;">llmr_sk_...${app.keySuffix}</div>
+          </div>
+          <button class="btn" style="padding:0.4rem; background:transparent; border:none; color:#ef4444;" onclick="deleteApp('${app.id}')" title="Revoke Key">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
+        </div>
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; font-size:0.85rem;">
+          <div style="background:var(--bg); padding:0.5rem; border-radius:6px; border:1px solid var(--border);">
+            <div style="color:var(--text-muted); margin-bottom:0.2rem; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">Routing Override</div>
+            <div style="font-weight:500;">${modeText}</div>
+          </div>
+          <div style="background:var(--bg); padding:0.5rem; border-radius:6px; border:1px solid var(--border);">
+            <div style="color:var(--text-muted); margin-bottom:0.2rem; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">Model Override</div>
+            <div style="font-weight:500;">${app.modelOverride ? app.modelOverride : '<span style="color:var(--text-muted); font-weight:normal;">Allowed any</span>'}</div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; border-top:1px solid var(--border); padding-top:0.75rem; margin-top:0.25rem;">
+          <div style="color:var(--text-muted);">
+            Requests: <span style="color:var(--text); font-weight:600;">${app.stats.requests}</span>
+            <span style="color:#ef4444; margin-left:0.5rem;">Fails: ${app.stats.failures}</span>
+          </div>
+          <div style="color:var(--text-muted);">
+            ${app.lastUsedAt ? 'Used ' + new Date(app.lastUsedAt).toLocaleDateString() : 'Never used'}
+          </div>
+        </div>
+      </div>
+    `;
+  });
 }
 
 checkVaultStatus();

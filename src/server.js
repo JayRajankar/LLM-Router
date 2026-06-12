@@ -630,11 +630,31 @@ app.post('/v1/chat/completions', async (req, res) => {
     // Apply App Overrides
     if (activeApp.modelOverride) {
       model = activeApp.modelOverride;
+    } else if (activeApp.defaultModel && (!model || model === 'auto')) {
+      model = activeApp.defaultModel;
+    }
+    
+    if (activeApp.temperature != null && activeApp.temperature !== "") {
+      temperature = parseFloat(activeApp.temperature);
+    }
+    
+    if (activeApp.maxTokens != null && activeApp.maxTokens !== "") {
+      max_tokens = parseInt(activeApp.maxTokens, 10);
     }
   }
 
   if (!messages || !Array.isArray(messages))
     return res.status(400).json({ error: { message: 'messages array is required' } });
+
+  // System Prompt Injection
+  if (activeApp && activeApp.systemPrompt) {
+    const sysMsg = messages.find(m => m.role === 'system');
+    if (sysMsg) {
+      sysMsg.content = activeApp.systemPrompt + "\n\n" + sysMsg.content;
+    } else {
+      messages.unshift({ role: 'system', content: activeApp.systemPrompt });
+    }
+  }
 
   if (!KEY_POOL.length)
     return res.status(503).json({ error: { message: 'No API keys configured. Copy .env.example → .env and add at least one key.' } });
@@ -856,7 +876,7 @@ const crypto = require('crypto');
 
 app.post('/api/apps/generate', (req, res) => {
   if (vault.isLocked()) return res.status(401).json({ error: 'Vault is locked' });
-  const { name, routingMode, modelOverride, customPoolModels } = req.body;
+  const { name, routingMode, modelOverride, customPoolModels, defaultModel, systemPrompt, temperature, maxTokens } = req.body;
   if (!name) return res.status(400).json({ error: 'App name required' });
 
   const rawKey = 'llmr_sk_' + crypto.randomBytes(24).toString('hex');
@@ -868,6 +888,10 @@ app.post('/api/apps/generate', (req, res) => {
     id, name, keyHash, keySuffix,
     routingMode: routingMode || 'inherit',
     modelOverride: modelOverride || '',
+    defaultModel: defaultModel || '',
+    systemPrompt: systemPrompt || '',
+    temperature: temperature || '',
+    maxTokens: maxTokens || '',
     customPoolModels: Array.isArray(customPoolModels) ? customPoolModels : [],
     stats: { requests: 0, failures: 0 },
     createdAt: Date.now(),

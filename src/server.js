@@ -4,6 +4,7 @@ const axios = require('axios');
 const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
+const vault = require('./vault');
 
 const app = express();
 app.use(cors());
@@ -414,7 +415,8 @@ function loadKeyPool() {
   for (const [providerId, envPrefix] of Object.entries(ENV_PREFIXES)) {
     for (let i = 1; i <= 10; i++) {
       const envVar = i === 1 ? envPrefix : `${envPrefix}_${i}`;
-      const key = process.env[envVar];
+      const vaultKeys = vault.getKeys();
+      const key = vaultKeys[envVar] || process.env[envVar];
       if (key && key.trim()) {
         const basePrefix = envPrefix.replace(/_API_KEY|_TOKEN|_KEY$/, '');
         const inAutoPool = process.env[`${basePrefix}_AUTO_POOL`] !== 'false';
@@ -597,6 +599,12 @@ async function callSlot(slot, messages, model, opts = {}) {
 //  MAIN ROUTE  POST /v1/chat/completions
 // ─────────────────────────────────────────────────────────────────────────────
 app.post('/v1/chat/completions', async (req, res) => {
+  if (vault.isLocked()) {
+    return res.status(401).json({
+      error: { message: 'Vault is locked. Please enter your Master Password in the Dashboard to unlock LLM Router.', type: 'vault_locked', code: 401 }
+    });
+  }
+
   const { messages, model, max_tokens, temperature } = req.body;
 
   if (!messages || !Array.isArray(messages))
@@ -775,12 +783,45 @@ app.post('/api/telemetry', async (req, res) => {
   res.json({ ok: true });
 });
 
+// Vault Endpoints
+app.get('/api/vault/status', (req, res) => {
+  res.json({ locked: vault.isLocked(), mode: vault.getMode() });
+});
+
+app.post('/api/vault/unlock', (req, res) => {
+  if (vault.unlockVault(req.body.password)) {
+    KEY_POOL.length = 0;
+    KEY_POOL.push(...loadKeyPool());
+    res.json({ ok: true });
+  } else {
+    res.status(401).json({ error: 'Invalid master password' });
+  }
+});
+
+app.post('/api/vault/set-password', (req, res) => {
+  try {
+    vault.setMasterPassword(req.body.password); // empty string = revert to hardware
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 app.post('/api/settings', (req, res) => {
+  if (vault.isLocked()) return res.status(401).json({ error: 'Vault is locked' });
   const updates = req.body;
   const envPath = path.join(process.cwd(), '.env');
   let envContent = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
   
+  const keyUpdates = {};
   for (const [k, v] of Object.entries(updates)) {
+    if (k.endsWith('_KEY') || k.endsWith('_TOKEN')) {
+      keyUpdates[k] = v;
+      continue;
+    }
+    
+    // Normal non-secret config
+    process.env[k] = v;
     // Only process empty if it's a model (to reset to default) or explicitly overriding.
     process.env[k] = v;
     
@@ -804,6 +845,11 @@ app.post('/api/settings', (req, res) => {
   }
   
   fs.writeFileSync(envPath, envContent.trim() + '\n', 'utf8');
+  try {
+    vault.updateKeys(keyUpdates);
+  } catch(e) {
+    return res.status(400).json({ error: e.message });
+  }
   
   KEY_POOL.length = 0;
   KEY_POOL.push(...loadKeyPool());
@@ -812,23 +858,56 @@ app.post('/api/settings', (req, res) => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  START
+//  DYNAMIC PORT & STARTUP
 // ─────────────────────────────────────────────────────────────────────────────
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  const byProv = {};
-  KEY_POOL.forEach(s => { byProv[s.providerId] = (byProv[s.providerId] || 0) + 1; });
+let argPort = null;
+const portIdx = process.argv.findIndex(a => a === '--port' || a === '-p');
+if (portIdx !== -1 && process.argv[portIdx + 1]) argPort = parseInt(process.argv[portIdx + 1], 10);
 
-  console.log(`\n⚡ LLM Router — http://localhost:${PORT}`);
-  console.log(`🎯 ${KEY_POOL.length} slot(s) across ${Object.keys(byProv).length} provider(s)\n`);
+let currentPort = argPort || process.env.PORT || 3000;
+let serverInstance;
 
-  if (!KEY_POOL.length) {
-    console.log('⚠️  No keys loaded. Copy .env.example → .env and add your free API keys.\n');
-    return;
+app.post('/api/port', (req, res) => {
+  const newPort = parseInt(req.body.port, 10);
+  if (!newPort || newPort < 1024 || newPort > 65535) return res.status(400).json({ error: 'Invalid port' });
+
+  const envPath = path.join(__dirname, '..', '.env');
+  let envContent = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
+  if (envContent.match(/^PORT=/m)) {
+    envContent = envContent.replace(/^PORT=.*$/m, `PORT=${newPort}`);
+  } else {
+    envContent += `\nPORT=${newPort}\n`;
   }
-  Object.entries(byProv).forEach(([id, n]) =>
-    console.log(`   ${PROVIDER_DEFS[id]?.icon || '•'} ${PROVIDER_DEFS[id]?.name || id}: ${n} key(s)`)
-  );
-  console.log(`\n📖 POST  http://localhost:${PORT}/v1/chat/completions`);
-  console.log(`📊 Dashboard: http://localhost:${PORT}\n`);
+  fs.writeFileSync(envPath, envContent.trim() + '\n', 'utf8');
+
+  res.json({ ok: true, port: newPort });
+
+  setTimeout(() => {
+    if (serverInstance) {
+      serverInstance.close(() => startServer(newPort));
+    }
+  }, 500);
 });
+
+function startServer(port) {
+  currentPort = port;
+  serverInstance = app.listen(port, () => {
+    const byProv = {};
+    KEY_POOL.forEach(s => { byProv[s.providerId] = (byProv[s.providerId] || 0) + 1; });
+
+    console.log(`\n⚡ LLM Router — http://localhost:${port}`);
+    console.log(`🎯 ${KEY_POOL.length} slot(s) across ${Object.keys(byProv).length} provider(s)\n`);
+
+    if (!KEY_POOL.length) {
+      console.log('⚠️  No keys loaded. Copy .env.example → .env and add your free API keys.\n');
+    } else {
+      Object.entries(byProv).forEach(([id, n]) =>
+        console.log(`   ${PROVIDER_DEFS[id]?.icon || '•'} ${PROVIDER_DEFS[id]?.name || id}: ${n} key(s)`)
+      );
+    }
+    console.log(`\n📖 POST  http://localhost:${port}/v1/chat/completions`);
+    console.log(`📊 Dashboard: http://localhost:${port}\n`);
+  });
+}
+
+startServer(currentPort);

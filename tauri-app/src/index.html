@@ -36,11 +36,18 @@
   <div class="spinner"></div>
   <div class="status" id="status">Waking up local backend...</div>
   <script>
+    const { invoke } = window.__TAURI__.core;
+    let targetPort = null;
+
     async function checkServer() {
+      if (!targetPort) {
+        try { targetPort = await invoke('get_port'); }
+        catch (e) { targetPort = 3000; }
+      }
       try {
-        const res = await fetch('http://127.0.0.1:3000/api/status');
+        const res = await fetch(`http://127.0.0.1:${targetPort}/api/status`);
         if (res.ok) {
-          window.location.href = 'http://127.0.0.1:3000';
+          window.location.href = `http://127.0.0.1:${targetPort}`;
           return;
         }
       } catch (e) {

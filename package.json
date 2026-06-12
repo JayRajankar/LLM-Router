@@ -17,14 +17,24 @@
       "src/logo.png"
     ]
   },
-  "keywords": ["llm", "ai", "router", "proxy", "groq", "openrouter", "cerebras", "free"],
+  "keywords": [
+    "llm",
+    "ai",
+    "router",
+    "proxy",
+    "groq",
+    "openrouter",
+    "cerebras",
+    "free"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
     "axios": "^1.7.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "node-machine-id": "^1.1.12"
   },
   "devDependencies": {
     "pkg": "^5.8.1"

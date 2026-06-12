@@ -72,6 +72,12 @@ Start the server:
 npm start
 ```
 
+### Changing the Default Port
+By default, the server runs on port `3000`. You can change this in three ways:
+1. **Via Dashboard UI**: In the App Dashboard, enter a new port next to the Endpoint URL and click Apply.
+2. **Via CLI**: Start the server with a flag: `node src/server.js --port 8080`
+3. **Via Environment Variable**: Add `PORT=8080` to your `.env` file.
+
 ## 💻 Usage
 
 ### 1. Using Dashboard Routing (Smart Auto / Custom Pool)

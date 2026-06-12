@@ -202,6 +202,22 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="vault-modal" style="background: rgba(6, 6, 8, 0.95); backdrop-filter: blur(10px); z-index: 9999;">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 style="margin:0; font-size:1.2rem; display:flex; align-items:center; gap:0.5rem;">🔒 Vault Locked</h2>
+    </div>
+    <div class="modal-body" style="text-align: center;">
+      <p style="color:var(--text-muted); margin-bottom: 1.5rem; font-size:0.9rem;">
+        Your API keys are secured. Please enter your Master Password to unlock the LLM Router.
+      </p>
+      <input type="password" id="vault-unlock-password" class="provider-input" placeholder="Enter Master Password" style="margin-bottom: 1rem; width: 100%; text-align: center;">
+      <button class="btn btn-primary" onclick="unlockVault()" style="width: 100%;">Unlock Router</button>
+      <div id="vault-unlock-error" style="color: #ef4444; margin-top: 1rem; font-size: 0.85rem; display: none;">Invalid Password</div>
+    </div>
+  </div>
+</div>
+
 <div class="wrap" id="main-wrap">
 
   <header id="tour-header">
@@ -216,13 +232,21 @@
     <button class="tab-btn active" onclick="switchTab('dashboard')" id="tab-btn-dashboard">Dashboard</button>
     <button class="tab-btn" onclick="switchTab('providers')" id="tab-btn-providers">Providers</button>
     <button class="tab-btn" onclick="switchTab('routing')" id="tab-btn-routing">Routing Strategies</button>
+    <button class="tab-btn" onclick="switchTab('security')" id="tab-btn-security">Security 🔒</button>
   </div>
 
   <div id="tab-dashboard" class="tab-content active">
-    <div class="ep-bar" id="tour-endpoint">
-      <span class="method">POST</span>
-      <span class="url" id="ep-url"></span>
-      <button class="copy-btn" onclick="copyEp()">Copy URL</button>
+    <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-bottom:2rem;">
+      <div class="ep-bar" id="tour-endpoint" style="flex:1; margin-bottom:0;">
+        <span class="method">POST</span>
+        <span class="url" id="ep-url"></span>
+        <button class="copy-btn" onclick="copyEp()">Copy URL</button>
+      </div>
+      <div style="display:flex; align-items:center; gap:0.5rem;">
+        <label style="font-size:0.85rem; color:var(--text-muted)">Port:</label>
+        <input type="number" id="port-input" style="width:80px; background:var(--surface); border:1px solid var(--border); color:var(--text); padding:0.5rem; border-radius:6px; font-family:var(--font-mono); font-size:0.85rem;">
+        <button class="btn btn-secondary" style="padding:0.5rem 1rem; font-size:0.8rem;" onclick="changePort()">Apply</button>
+      </div>
     </div>
 
     <div class="stats-grid">
@@ -303,6 +327,25 @@
     </div>
   </div> <!-- End Tab Routing -->
 
+  <div id="tab-security" class="tab-content">
+    <div class="sec-title" style="display:flex; align-items:center; gap:0.5rem;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      API Key Encryption Vault
+    </div>
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem; margin-bottom:1.5rem;">
+      <div style="margin-bottom:1rem; color:var(--text-muted); font-size:0.9rem;">
+        Your API keys are securely encrypted at rest. By default, they are encrypted transparently using your hardware's unique fingerprint. If you want maximum security, you can enable <strong>Master Password Mode</strong>.
+      </div>
+      
+      <div style="display:flex; flex-direction:column; gap:1rem; max-width: 400px;">
+        <label style="font-weight:600; font-size:0.9rem;">Set or Change Master Password</label>
+        <input type="password" id="new-master-password" class="provider-input" placeholder="Leave empty to use Hardware Encryption">
+        <button class="btn btn-primary" onclick="setMasterPassword()">Save Security Settings</button>
+      </div>
+      <div id="vault-status-msg" style="margin-top:1rem; font-size:0.85rem; font-weight:500;"></div>
+    </div>
+  </div> <!-- End Tab Security -->
+
   <footer style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); text-align: center;">
     <div style="font-weight: 500; color: #fca5a5; margin-bottom: 1rem; font-size: 0.85rem; display:flex; align-items:center; justify-content:center; gap:0.5rem;">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -372,7 +415,23 @@
 
 <script>
 const BASE = window.location.origin;
+const currentPort = window.location.port || '80';
+document.getElementById('port-input').value = currentPort;
 document.getElementById('ep-url').textContent = `${BASE}/v1/chat/completions`;
+
+async function changePort() {
+  const p = parseInt(document.getElementById('port-input').value);
+  if (!p || p === parseInt(currentPort)) return;
+  const btn = document.querySelector('button[onclick="changePort()"]');
+  btn.textContent = 'Applying...';
+  try {
+    await fetch(`${BASE}/api/port`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ port: p }) });
+    setTimeout(() => { window.location.href = `http://${window.location.hostname}:${p}`; }, 1000);
+  } catch(e) {
+    alert('Failed to change port');
+    btn.textContent = 'Apply';
+  }
+}
 
 function copyEp(){
   navigator.clipboard.writeText(document.getElementById('ep-url').textContent);
@@ -475,6 +534,9 @@ async function load(){
   if (tourActive) return; // Pause live updates while tutorial is running so DOM doesn't rebuild and break highlights
   
   try{
+    const vstat = await fetch(`${BASE}/api/vault/status`).then(r=>r.json());
+    if (vstat.locked) { checkVaultStatus(); return; } // Do not load if locked
+
     const d = await fetch(`${BASE}/api/status`).then(r=>r.json());
     providersData = d.providers;
     const s = await fetch(`${BASE}/api/settings`).then(r=>r.json());
@@ -856,6 +918,82 @@ async function submitWelcomeModal() {
   closeWelcomeModal();
 }
 
+}
+
+async function checkVaultStatus() {
+  try {
+    const res = await fetch(`${BASE}/api/vault/status`).then(r => r.json());
+    if (res.locked) {
+      document.getElementById('vault-modal').classList.add('open');
+      document.getElementById('vault-modal').style.display = 'flex';
+      document.getElementById('main-wrap').style.filter = 'blur(8px)';
+      document.getElementById('main-wrap').style.pointerEvents = 'none';
+    } else {
+      document.getElementById('vault-modal').classList.remove('open');
+      document.getElementById('vault-modal').style.display = 'none';
+      document.getElementById('main-wrap').style.filter = 'none';
+      document.getElementById('main-wrap').style.pointerEvents = 'auto';
+      
+      const msg = document.getElementById('vault-status-msg');
+      if (msg) {
+        msg.textContent = res.mode === 'hardware' 
+          ? '✅ Currently using Hardware-Bound Encryption (No password required).'
+          : '✅ Currently using Master Password Vault Mode.';
+        msg.style.color = 'var(--primary)';
+      }
+    }
+  } catch(e) {}
+}
+
+async function unlockVault() {
+  const pwd = document.getElementById('vault-unlock-password').value;
+  const err = document.getElementById('vault-unlock-error');
+  err.style.display = 'none';
+  
+  try {
+    const res = await fetch(`${BASE}/api/vault/unlock`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pwd })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      checkVaultStatus();
+      load();
+    } else {
+      err.style.display = 'block';
+    }
+  } catch(e) {
+    err.style.display = 'block';
+    err.textContent = 'Connection error';
+  }
+}
+
+async function setMasterPassword() {
+  const pwd = document.getElementById('new-master-password').value;
+  const msg = document.getElementById('vault-status-msg');
+  msg.textContent = 'Saving...';
+  msg.style.color = 'var(--text)';
+  
+  try {
+    const res = await fetch(`${BASE}/api/vault/set-password`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pwd })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      document.getElementById('new-master-password').value = '';
+      checkVaultStatus();
+    } else {
+      msg.textContent = 'Error: ' + data.error;
+      msg.style.color = '#ef4444';
+    }
+  } catch(e) {
+    msg.textContent = 'Connection error';
+    msg.style.color = '#ef4444';
+  }
+}
+
+checkVaultStatus();
 checkWelcomeModal();
 load();
 setInterval(load, 5000);

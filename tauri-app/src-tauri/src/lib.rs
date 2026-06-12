@@ -4,6 +4,20 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
+#[tauri::command]
+fn get_port() -> u16 {
+    if let Ok(content) = std::fs::read_to_string("../.env") {
+        for line in content.lines() {
+            if line.starts_with("PORT=") {
+                if let Ok(port) = line[5..].trim().parse::<u16>() {
+                    return port;
+                }
+            }
+        }
+    }
+    3000
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -19,7 +33,7 @@ pub fn run() {
             
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![greet, get_port])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

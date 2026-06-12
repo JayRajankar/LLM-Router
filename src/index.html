@@ -407,6 +407,8 @@
   </div>
 </div>
 
+<datalist id="all-models-list"></datalist>
+
 <!-- Create App Modal -->
 <div class="modal-overlay" id="app-modal">
   <div class="modal" style="max-width:450px;">
@@ -422,7 +424,7 @@
       
       <div class="config-group">
         <label class="config-label">Routing Override (Optional)</label>
-        <select id="app-routing-input" class="provider-input" style="width:100%;">
+        <select id="app-routing-input" class="provider-input" style="width:100%;" onchange="toggleAppCustomPoolUI()">
           <option value="inherit">Inherit Global Strategy (Default)</option>
           <option value="smart_auto">Force Smart Auto</option>
           <option value="custom_pool">Force Custom Pool</option>
@@ -430,9 +432,19 @@
         <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.3rem;">If set, forces this routing mode for all requests from this key.</div>
       </div>
 
+      <!-- Per-App Custom Pool UI -->
+      <div id="app-custom-pool-section" style="display:none; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:1rem; margin-bottom:1rem;">
+        <label class="config-label" style="color:var(--primary);">Configure Per-App Custom Pool</label>
+        <div style="display:flex; gap:0.5rem; margin-bottom:0.5rem;">
+          <input type="text" id="app-pool-model-input" list="all-models-list" class="provider-input" style="flex:1;" placeholder="Select or type model...">
+          <button class="btn btn-secondary" onclick="addAppCustomModel()">Add</button>
+        </div>
+        <div id="app-custom-pool-tags" style="display:flex; flex-wrap:wrap; gap:0.5rem;"></div>
+      </div>
+
       <div class="config-group">
         <label class="config-label">Force Model (Optional)</label>
-        <input type="text" id="app-model-input" class="provider-input" placeholder="e.g. llama-3.1-8b" style="width:100%;">
+        <input type="text" id="app-model-input" list="all-models-list" class="provider-input" placeholder="Select or type model..." style="width:100%;">
         <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.3rem;">If set, intercepts whatever model the app requests and safely reroutes it to this exact model. Leave blank to allow app to choose.</div>
       </div>
 
@@ -652,13 +664,16 @@ async function load(){
       </tr>`).join('');
     }
     
-    // Populate Routing Models Dropdown
+    // Populate Routing Models Dropdown and Datalist
     const allModels = new Set();
     for (const p of Object.values(d.providers)) p.models.forEach(m => allModels.add(m));
     const select = document.getElementById('custom-model-select');
     const curVal = select.value;
-    select.innerHTML = Array.from(allModels).sort().map(m => `<option value="${m}">${m}</option>`).join('');
+    const sortedModels = Array.from(allModels).sort();
+    select.innerHTML = sortedModels.map(m => `<option value="${m}">${m}</option>`).join('');
     if (curVal && allModels.has(curVal)) select.value = curVal;
+    
+    document.getElementById('all-models-list').innerHTML = sortedModels.map(m => `<option value="${m}">`).join('');
     
     // Initialize Routing State once
     if (!window._routingInit) {
@@ -1070,10 +1085,45 @@ async function toggleAuth(enabled) {
   } catch(e) {}
 }
 
+let appCustomModels = [];
+
+function toggleAppCustomPoolUI() {
+  const isCustom = document.getElementById('app-routing-input').value === 'custom_pool';
+  document.getElementById('app-custom-pool-section').style.display = isCustom ? 'block' : 'none';
+}
+
+function updateAppCustomModelsUI() {
+  const container = document.getElementById('app-custom-pool-tags');
+  container.innerHTML = appCustomModels.map(m => `
+    <span class="custom-model-tag" style="display:inline-flex; align-items:center; gap:0.25rem; background:var(--surface2); color:var(--text); padding:0.25rem 0.5rem; border-radius:4px; font-size:0.8rem; border:1px solid var(--border);">
+      ${m}
+      <button style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; padding:0; line-height:1;" onclick="removeAppCustomModel('${m}')">×</button>
+    </span>
+  `).join('');
+}
+
+function addAppCustomModel() {
+  const input = document.getElementById('app-pool-model-input');
+  const val = input.value.trim();
+  if (val && !appCustomModels.includes(val)) {
+    appCustomModels.push(val);
+    updateAppCustomModelsUI();
+  }
+  input.value = '';
+}
+
+function removeAppCustomModel(m) {
+  appCustomModels = appCustomModels.filter(x => x !== m);
+  updateAppCustomModelsUI();
+}
+
 function openAppModal() {
   document.getElementById('app-name-input').value = '';
   document.getElementById('app-routing-input').value = 'inherit';
   document.getElementById('app-model-input').value = '';
+  appCustomModels = [];
+  updateAppCustomModelsUI();
+  toggleAppCustomPoolUI();
   document.getElementById('app-gen-result').style.display = 'none';
   document.getElementById('app-gen-btn').style.display = 'block';
   document.getElementById('app-modal').classList.add('open');
@@ -1092,7 +1142,7 @@ async function generateAppKey() {
   try {
     const res = await fetch(`${BASE}/api/apps/generate`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, routingMode, modelOverride })
+      body: JSON.stringify({ name, routingMode, modelOverride, customPoolModels: appCustomModels })
     });
     const data = await res.json();
     if (data.ok) {
@@ -1150,6 +1200,10 @@ function renderApps(auth) {
           <div style="background:var(--bg); padding:0.5rem; border-radius:6px; border:1px solid var(--border);">
             <div style="color:var(--text-muted); margin-bottom:0.2rem; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">Routing Override</div>
             <div style="font-weight:500;">${modeText}</div>
+            ${app.routingMode === 'custom_pool' && app.customPoolModels && app.customPoolModels.length > 0 ? 
+              `<div style="margin-top:0.5rem; display:flex; flex-wrap:wrap; gap:0.25rem;">
+                ${app.customPoolModels.map(m => `<span style="font-size:0.7rem; background:var(--surface2); padding:0.1rem 0.3rem; border-radius:3px; border:1px solid var(--border);">${m}</span>`).join('')}
+              </div>` : ''}
           </div>
           <div style="background:var(--bg); padding:0.5rem; border-radius:6px; border:1px solid var(--border);">
             <div style="color:var(--text-muted); margin-bottom:0.2rem; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">Model Override</div>

@@ -643,10 +643,14 @@ app.post('/v1/chat/completions', async (req, res) => {
   const maxAttempts = Math.min(KEY_POOL.length, 30);
 
   let routingMode = process.env.ROUTING_MODE || 'smart';
+  let customModels = (process.env.CUSTOM_POOL_MODELS || '').split(',').map(m => m.trim()).filter(Boolean);
+
   if (activeApp && activeApp.routingMode !== 'inherit') {
     routingMode = activeApp.routingMode === 'smart_auto' ? 'smart' : 'custom';
+    if (routingMode === 'custom' && activeApp.customPoolModels && activeApp.customPoolModels.length > 0) {
+      customModels = activeApp.customPoolModels;
+    }
   }
-  const customModels = (process.env.CUSTOM_POOL_MODELS || '').split(',').map(m => m.trim()).filter(Boolean);
 
   let targetTier = null;
   if (model === 'auto' && routingMode === 'smart') {
@@ -851,7 +855,7 @@ const crypto = require('crypto');
 
 app.post('/api/apps/generate', (req, res) => {
   if (vault.isLocked()) return res.status(401).json({ error: 'Vault is locked' });
-  const { name, routingMode, modelOverride } = req.body;
+  const { name, routingMode, modelOverride, customPoolModels } = req.body;
   if (!name) return res.status(400).json({ error: 'App name required' });
 
   const rawKey = 'llmr_sk_' + crypto.randomBytes(24).toString('hex');
@@ -863,6 +867,7 @@ app.post('/api/apps/generate', (req, res) => {
     id, name, keyHash, keySuffix,
     routingMode: routingMode || 'inherit',
     modelOverride: modelOverride || '',
+    customPoolModels: Array.isArray(customPoolModels) ? customPoolModels : [],
     stats: { requests: 0, failures: 0 },
     createdAt: Date.now(),
     lastUsedAt: null

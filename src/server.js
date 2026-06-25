@@ -603,6 +603,43 @@ async function callSlot(slot, messages, model, opts = {}) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+//  STANDARD API ROUTES
+// ─────────────────────────────────────────────────────────────────────────────
+
+app.get('/v1/models', (req, res) => {
+  if (vault.isLocked()) {
+    return res.status(401).json({
+      error: { message: 'Vault is locked. Please enter your Master Password in the Dashboard to unlock LLM Router.', type: 'vault_locked', code: 401 }
+    });
+  }
+
+  const allModels = new Set();
+  for (const p of Object.values(PROVIDER_DEFS)) {
+    p.models.forEach(m => allModels.add(m));
+  }
+  
+  const data = Array.from(allModels).sort().map(m => ({
+    id: m,
+    object: "model",
+    created: 1686935002,
+    owned_by: "llm-router"
+  }));
+
+  // Add the special "auto" model
+  data.unshift({
+    id: "auto",
+    object: "model",
+    created: 1686935002,
+    owned_by: "llm-router"
+  });
+
+  res.json({
+    object: "list",
+    data: data
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 //  MAIN ROUTE  POST /v1/chat/completions
 // ─────────────────────────────────────────────────────────────────────────────
 app.post('/v1/chat/completions', async (req, res) => {
